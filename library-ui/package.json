@@ -1,8 +1,8 @@
 {
-  "name": "ruoyi",
+  "name": "library",
   "version": "3.9.1",
   "description": "图书管理系统",
-  "author": "若依",
+  "author": "noname",
   "license": "MIT",
   "scripts": {
     "dev": "vue-cli-service serve",

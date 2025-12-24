@@ -92,9 +92,9 @@ export default {
       },
       loading: false,
       // 验证码开关
-      captchaEnabled: true,
+      captchaEnabled: undefined,
       // 注册开关
-      register: false,
+      register: true,
       redirect: undefined
     }
   },
