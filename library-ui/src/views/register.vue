@@ -59,10 +59,7 @@
         </div>
       </el-form-item>
     </el-form>
-    <!--  底部  -->
-    <div class="el-register-footer">
-      <span>{{ footerContent }}</span>
-    </div>
+    <!--  底部已移除版权信息  -->
   </div>
 </template>
 
