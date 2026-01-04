@@ -188,7 +188,9 @@
           <el-input v-model="form.availableQuantity" placeholder="请输入可借数量" />
         </el-form-item>
         <el-form-item label="已借数量" prop="borrowedQuantity">
-          <el-input v-model="form.borrowedQuantity" placeholder="请输入已借数量" />
+          <el-input v-model="form.borrowedQuantity"
+                    :disabled="form.id != null"
+                    placeholder="请输入已借数量" />
         </el-form-item>
         <el-form-item label="图书状态" prop="status">
           <el-radio-group v-model="form.status">
