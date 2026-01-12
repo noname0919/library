@@ -11,7 +11,7 @@ public enum LibraryExceptionEnum {
     
     /** 图书相关异常 */
     BOOK_NOT_FOUND(1001, "图书不存在"),
-    BOOK_NAME_EXIST(1002, "图书名称已存在"),
+    BOOK_EXIST(1002, "图书已存在"),
     BOOK_STOCK_NOT_ENOUGH(1003, "图书库存不足"),
     BOOK_BORROW_LIMIT_EXCEEDED(1004, "图书借阅数量已达上限"),
     BOOK_RETURN_DATE_EXCEEDED(1005, "图书已超期归还"),
