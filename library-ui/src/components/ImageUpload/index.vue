@@ -100,7 +100,6 @@ export default {
       dialogVisible: false,
       hideUpload: false,
       baseUrl: process.env.VUE_APP_BASE_API,
-      uploadImgUrl: process.env.VUE_APP_BASE_API + this.action, // 上传的图片服务器地址
       headers: {
         Authorization: "Bearer " + getToken(),
       },
@@ -130,11 +129,8 @@ export default {
           // 然后将数组转为对象数组
           this.fileList = list.map(item => {
             if (typeof item === "string") {
-              if (item.indexOf(this.baseUrl) === -1 && !isExternal(item)) {
-                  item = { name: this.baseUrl + item, url: this.baseUrl + item }
-              } else {
-                  item = { name: item, url: item }
-              }
+              // 直接使用完整URL，不添加baseUrl前缀（适配OSS上传）
+              item = { name: item, url: item }
             }
             return item
           })
@@ -152,6 +148,11 @@ export default {
     showTip() {
       return this.isShowTip && (this.fileType || this.fileSize)
     },
+    // 上传的图片服务器地址
+    uploadImgUrl() {
+      // 直接使用相对路径，让Vue代理配置处理请求转发
+      return this.action
+    }
   },
   methods: {
     // 上传前loading加载
@@ -196,7 +197,7 @@ export default {
     // 上传成功回调
     handleUploadSuccess(res, file) {
       if (res.code === 200) {
-        this.uploadList.push({ name: res.fileName, url: res.fileName })
+        this.uploadList.push({ name: res.fileName, url: res.url })
         this.uploadedSuccessfully()
       } else {
         this.number--
@@ -240,7 +241,9 @@ export default {
       separator = separator || ","
       for (let i in list) {
         if (list[i].url) {
-          strs += list[i].url.replace(this.baseUrl, "") + separator
+          let url = list[i].url
+          // 直接使用完整URL，不做任何修改（适配OSS上传）
+          strs += url + separator
         }
       }
       return strs != '' ? strs.substr(0, strs.length - 1) : ''

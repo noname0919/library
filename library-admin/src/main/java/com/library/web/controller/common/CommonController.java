@@ -11,7 +11,9 @@ import com.aliyun.oss.common.auth.CredentialsProviderFactory;
 import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
 import com.aliyun.oss.common.comm.SignVersion;
 import com.aliyun.oss.model.GetObjectRequest;
+import com.aliyun.oss.model.OSSObject;
 import lombok.SneakyThrows;
+import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,35 +48,80 @@ public class CommonController
 
     /**
      * 通用下载请求
-     * 
+     *
      * @param fileName 文件名称
      * @param delete 是否删除
      */
     @GetMapping("/download")
-    public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request)
-    {
-        try
-        {
-            if (!FileUtils.checkAllowDownload(fileName))
-            {
-                throw new Exception(StringUtils.format("文件名称({})非法，不允许下载。 ", fileName));
+    public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request) {
+        try {
+            // 检查文件名是否合法（这里可能需要根据OSS的路径规则调整）
+            if (fileName == null || fileName.isEmpty()) {
+                throw new Exception("文件名称不能为空");
             }
-            String realFileName = System.currentTimeMillis() + fileName.substring(fileName.indexOf("_") + 1);
-            String filePath = RuoYiConfig.getDownloadPath() + fileName;
 
-            response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
-            FileUtils.setAttachmentResponseHeader(response, realFileName);
-            FileUtils.writeBytes(filePath, response.getOutputStream());
-            if (delete)
-            {
-                FileUtils.deleteFile(filePath);
+            // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
+            String endpoint = "https://oss-cn-guangzhou.aliyuncs.com";
+            // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+            EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+            // 填写Bucket名称，例如examplebucket。
+            String bucketName = "noname1";
+            // 填写Bucket所在地域。
+            String region = "cn-guangzhou";
+
+            // 创建OSSClient实例。
+            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+            clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+            OSS ossClient = OSSClientBuilder.create()
+                    .endpoint(endpoint)
+                    .credentialsProvider(credentialsProvider)
+                    .clientConfiguration(clientBuilderConfiguration)
+                    .region(region)
+                    .build();
+
+            try {
+                // 从OSS获取文件对象
+                OSSObject ossObject = ossClient.getObject(bucketName, fileName);
+
+                // 设置响应头
+                String realFileName = System.currentTimeMillis() + "_" + FileUtils.getName(fileName);
+                response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+                FileUtils.setAttachmentResponseHeader(response, realFileName);
+
+                // 将OSS文件流写入响应输出流
+                IOUtils.copy(ossObject.getObjectContent(), response.getOutputStream());
+
+                // 关闭OSS对象
+                ossObject.close();
+
+                // OSS中不支持直接删除文件（delete参数在OSS场景下无意义）
+                if (delete != null && delete) {
+                    log.warn("OSS不支持下载后删除操作，如需删除请调用OSS删除接口");
+                }
+            } catch (OSSException oe) {
+                System.out.println("Caught an OSSException, which means your request made it to OSS, "
+                        + "but was rejected with an error response for some reason.");
+                System.out.println("Error Message:" + oe.getErrorMessage());
+                System.out.println("Error Code:" + oe.getErrorCode());
+                System.out.println("Request ID:" + oe.getRequestId());
+                System.out.println("Host ID:" + oe.getHostId());
+                log.error("从OSS下载文件失败", oe);
+            } catch (ClientException ce) {
+                System.out.println("Caught an ClientException, which means the client encountered "
+                        + "a serious internal problem while trying to communicate with OSS, "
+                        + "such as not being able to access the network.");
+                System.out.println("Error Message:" + ce.getMessage());
+                log.error("OSS客户端异常", ce);
+            } finally {
+                if (ossClient != null) {
+                    ossClient.shutdown();
+                }
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             log.error("下载文件失败", e);
         }
     }
+
 
     /**
      * 通用上传请求（单个）
@@ -139,64 +186,93 @@ public class CommonController
             }
         }
     }
-
-//    {
-//        try
-//        {
-//            // 上传文件路径
-//            String filePath = RuoYiConfig.getUploadPath();
-//            // 上传并返回新文件名称
-//            String fileName = FileUploadUtils.upload(filePath, file);
-//            String url = serverConfig.getUrl() + fileName;
-//            AjaxResult ajax = AjaxResult.success();
-//            ajax.put("url", url);
-//            ajax.put("fileName", fileName);
-//            ajax.put("newFileName", FileUtils.getName(fileName));
-//            ajax.put("originalFilename", file.getOriginalFilename());
-//            return ajax;
-//        }
-//        catch (Exception e)
-//        {
-//            return AjaxResult.error(e.getMessage());
-//        }
-//    }
-
     /**
      * 通用上传请求（多个）
      */
     @PostMapping("/uploads")
-    public AjaxResult uploadFiles(List<MultipartFile> files) throws Exception
-    {
-        try
-        {
-            // 上传文件路径
-            String filePath = RuoYiConfig.getUploadPath();
-            List<String> urls = new ArrayList<String>();
-            List<String> fileNames = new ArrayList<String>();
-            List<String> newFileNames = new ArrayList<String>();
-            List<String> originalFilenames = new ArrayList<String>();
-            for (MultipartFile file : files)
-            {
-                // 上传并返回新文件名称
-                String fileName = FileUploadUtils.upload(filePath, file);
-                String url = serverConfig.getUrl() + fileName;
-                urls.add(url);
-                fileNames.add(fileName);
-                newFileNames.add(FileUtils.getName(fileName));
-                originalFilenames.add(file.getOriginalFilename());
-            }
-            AjaxResult ajax = AjaxResult.success();
-            ajax.put("urls", StringUtils.join(urls, FILE_DELIMITER));
-            ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMITER));
-            ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMITER));
-            ajax.put("originalFilenames", StringUtils.join(originalFilenames, FILE_DELIMITER));
-            return ajax;
+    public AjaxResult uploadFiles(List<MultipartFile> files) {
+        if (files == null || files.isEmpty()) {
+            return AjaxResult.error("上传文件不能为空");
         }
-        catch (Exception e)
-        {
+
+        try {
+            // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
+            String endpoint = "https://oss-cn-guangzhou.aliyuncs.com";
+            // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+            EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+            // 填写Bucket名称，例如examplebucket。
+            String bucketName = "noname1";
+            // 填写Bucket所在地域。
+            String region = "cn-guangzhou";
+
+            // 创建OSSClient实例。
+            // 当OSSClient实例不再使用时，调用shutdown方法以释放资源。
+            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+            clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+            OSS ossClient = OSSClientBuilder.create()
+                    .endpoint(endpoint)
+                    .credentialsProvider(credentialsProvider)
+                    .clientConfiguration(clientBuilderConfiguration)
+                    .region(region)
+                    .build();
+
+            try {
+                List<String> urls = new ArrayList<String>();
+                List<String> fileNames = new ArrayList<String>();
+                List<String> newFileNames = new ArrayList<String>();
+                List<String> originalFilenames = new ArrayList<String>();
+
+                for (MultipartFile file : files) {
+                    if (file.isEmpty()) {
+                        continue; // 跳过空文件
+                    }
+
+                    // 生成上传到OSS的文件名，使用时间戳+原始文件名避免重复
+                    String originalFilename = file.getOriginalFilename();
+                    String objectName = "uploads/" + System.currentTimeMillis() + "_" + originalFilename;
+
+                    // 上传文件流到OSS
+                    ossClient.putObject(bucketName, objectName, file.getInputStream());
+
+                    // 构建访问URL
+                    String url = "https://" + bucketName + "." + endpoint.replace("https://", "") + "/" + objectName;
+
+                    urls.add(url);
+                    fileNames.add(objectName);
+                    newFileNames.add(FileUtils.getName(objectName));
+                    originalFilenames.add(file.getOriginalFilename());
+                }
+
+                AjaxResult ajax = AjaxResult.success();
+                ajax.put("urls", StringUtils.join(urls, FILE_DELIMITER));
+                ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMITER));
+                ajax.put("newFileNames", StringUtils.join(newFileNames, FILE_DELIMITER));
+                ajax.put("originalFilenames", StringUtils.join(originalFilenames, FILE_DELIMITER));
+                return ajax;
+            } catch (OSSException oe) {
+                System.out.println("Caught an OSSException, which means your request made it to OSS, "
+                        + "but was rejected with an error response for some reason.");
+                System.out.println("Error Message:" + oe.getErrorMessage());
+                System.out.println("Error Code:" + oe.getErrorCode());
+                System.out.println("Request ID:" + oe.getRequestId());
+                System.out.println("Host ID:" + oe.getHostId());
+                return AjaxResult.error("文件上传失败：" + oe.getErrorMessage());
+            } catch (ClientException ce) {
+                System.out.println("Caught an ClientException, which means the client encountered "
+                        + "a serious internal problem while trying to communicate with OSS, "
+                        + "such as not being able to access the network.");
+                System.out.println("Error Message:" + ce.getMessage());
+                return AjaxResult.error("文件上传失败：" + ce.getMessage());
+            } finally {
+                if (ossClient != null) {
+                    ossClient.shutdown();
+                }
+            }
+        } catch (Exception e) {
             return AjaxResult.error(e.getMessage());
         }
     }
+
 
     /**
      * 本地资源通用下载
