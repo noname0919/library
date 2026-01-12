@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="user-info-head" @click="editCropper()"><img v-bind:src="options.img" title="点击上传头像" class="img-circle img-lg" /></div>
+    <div class="user-info-head" @click="editCropper()"><image-preview :src="options.img" width="120px" height="120px" /></div>
     <el-dialog :title="title" :visible.sync="open" width="800px" append-to-body @opened="modalOpened"  @close="closeDialog">
       <el-row>
         <el-col :xs="24" :md="12" :style="{height: '350px'}">
@@ -58,9 +58,10 @@ import store from "@/store"
 import { VueCropper } from "vue-cropper"
 import { uploadAvatar } from "@/api/system/user"
 import { debounce } from '@/utils'
+import ImagePreview from "@/components/ImagePreview/index.vue"
 
 export default {
-  components: { VueCropper },
+  components: { VueCropper, ImagePreview },
   data() {
     return {
       // 是否显示弹出层
@@ -137,7 +138,7 @@ export default {
         formData.append("avatarfile", data, this.options.filename)
         uploadAvatar(formData).then(response => {
           this.open = false
-          this.options.img = process.env.VUE_APP_BASE_API + response.imgUrl
+          this.options.img = response.imgUrl
           store.commit('SET_AVATAR', this.options.img)
           this.$modal.msgSuccess("修改成功")
           this.visible = false

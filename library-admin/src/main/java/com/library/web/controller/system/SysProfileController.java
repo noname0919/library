@@ -1,6 +1,12 @@
 package com.library.web.controller.system;
 
 import java.util.Map;
+
+import com.aliyun.oss.ClientBuilderConfiguration;
+import com.aliyun.oss.OSSException;
+import com.aliyun.oss.common.auth.CredentialsProviderFactory;
+import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
+import com.aliyun.oss.common.comm.SignVersion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
+import com.aliyuncs.exceptions.ClientException;
 import com.library.common.annotation.Log;
-import com.library.common.config.RuoYiConfig;
 import com.library.common.core.controller.BaseController;
 import com.library.common.core.domain.AjaxResult;
 import com.library.common.core.domain.entity.SysUser;
@@ -21,8 +29,8 @@ import com.library.common.utils.DateUtils;
 import com.library.common.utils.SecurityUtils;
 import com.library.common.utils.StringUtils;
 import com.library.common.utils.file.FileUploadUtils;
-import com.library.common.utils.file.FileUtils;
 import com.library.common.utils.file.MimeTypeUtils;
+import lombok.SneakyThrows;
 import com.library.framework.web.service.TokenService;
 import com.library.system.service.ISysUserService;
 
@@ -123,25 +131,61 @@ public class SysProfileController extends BaseController
      */
     @Log(title = "用户头像", businessType = BusinessType.UPDATE)
     @PostMapping("/avatar")
+    @SneakyThrows
     public AjaxResult avatar(@RequestParam("avatarfile") MultipartFile file) throws Exception
     {
         if (!file.isEmpty())
         {
-            LoginUser loginUser = getLoginUser();
-            String avatar = FileUploadUtils.upload(RuoYiConfig.getAvatarPath(), file, MimeTypeUtils.IMAGE_EXTENSION, true);
-            if (userService.updateUserAvatar(loginUser.getUserId(), avatar))
-            {
-                String oldAvatar = loginUser.getUser().getAvatar();
-                if (StringUtils.isNotEmpty(oldAvatar))
+            // 验证文件类型和大小
+            FileUploadUtils.assertAllowed(file, MimeTypeUtils.IMAGE_EXTENSION);
+            // Endpoint以华东1（杭州）为例，其它Region请按实际情况填写。
+            String endpoint = "https://oss-cn-guangzhou.aliyuncs.com";
+            // 从环境变量中获取访问凭证。运行本代码示例之前，请确保已设置环境变量OSS_ACCESS_KEY_ID和OSS_ACCESS_KEY_SECRET。
+            EnvironmentVariableCredentialsProvider credentialsProvider = CredentialsProviderFactory.newEnvironmentVariableCredentialsProvider();
+            // 填写Bucket名称，例如examplebucket。
+            String bucketName = "noname1";
+            // 生成上传到OSS的文件名，使用时间戳+原始文件名避免重复
+            String originalFilename = file.getOriginalFilename();
+            String objectName = "avatar/" + System.currentTimeMillis() + "_" + originalFilename;
+            // 填写Bucket所在地域。
+            String region = "cn-guangzhou";
+            // 创建OSSClient实例。
+            // 当OSSClient实例不再使用时，调用shutdown方法以释放资源。
+            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+            clientBuilderConfiguration.setSignatureVersion(SignVersion.V4);
+            OSS ossClient = OSSClientBuilder.create()
+                    .endpoint(endpoint)
+                    .credentialsProvider(credentialsProvider)
+                    .clientConfiguration(clientBuilderConfiguration)
+                    .region(region)
+                    .build();
+            try {
+                // 上传文件流到OSS
+                ossClient.putObject(bucketName, objectName, file.getInputStream());
+                // 构建访问URL
+                String avatarUrl = "https://" + bucketName + "." + endpoint.replace("https://", "") + "/" + objectName;
+                
+                LoginUser loginUser = getLoginUser();
+                if (userService.updateUserAvatar(loginUser.getUserId(), avatarUrl))
                 {
-                    FileUtils.deleteFile(RuoYiConfig.getProfile() + FileUtils.stripPrefix(oldAvatar));
+                    // 更新缓存用户头像
+                    loginUser.getUser().setAvatar(avatarUrl);
+                    tokenService.setLoginUser(loginUser);
+                    
+                    AjaxResult ajax = AjaxResult.success();
+                    ajax.put("imgUrl", avatarUrl);
+                    return ajax;
                 }
-                AjaxResult ajax = AjaxResult.success();
-                ajax.put("imgUrl", avatar);
-                // 更新缓存用户头像
-                loginUser.getUser().setAvatar(avatar);
-                tokenService.setLoginUser(loginUser);
-                return ajax;
+            } catch (OSSException oe) {
+                logger.error("OSSException occurred: {}", oe.getErrorMessage(), oe);
+                return error("文件上传失败：" + oe.getErrorMessage());
+            } catch (Exception e) {
+                logger.error("文件上传异常：{}", e.getMessage(), e);
+                return error("文件上传异常，请联系管理员");
+            } finally {
+                if (ossClient != null) {
+                    ossClient.shutdown();
+                }
             }
         }
         return error("上传图片异常，请联系管理员");
