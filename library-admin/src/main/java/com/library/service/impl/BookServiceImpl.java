@@ -1,7 +1,11 @@
 package com.library.service.impl;
 
 import java.util.List;
+
+import com.library.common.exception.LibraryException;
+import com.library.common.exception.LibraryExceptionEnum;
 import com.library.common.utils.DateUtils;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.library.mapper.BookMapper;
@@ -15,10 +19,10 @@ import com.library.service.IBookService;
  * @date 2025-12-30
  */
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements IBookService 
 {
-    @Autowired
-    private BookMapper bookMapper;
+    private final BookMapper bookMapper;
 
     /**
      * 查询图书基本信息
@@ -54,6 +58,11 @@ public class BookServiceImpl implements IBookService
     public int insertBook(Book book)
     {
         book.setCreateTime(DateUtils.getNowDate());
+        //校验新增是否重复
+        boolean isExist = bookMapper.checkAddExist(book.getIsbn());
+        if(isExist){
+            throw new LibraryException(LibraryExceptionEnum.BOOK_EXIST);
+        }
         return bookMapper.insertBook(book);
     }
 
@@ -67,6 +76,11 @@ public class BookServiceImpl implements IBookService
     public int updateBook(Book book)
     {
         book.setUpdateTime(DateUtils.getNowDate());
+        //判断修改后是否重复
+        boolean isExist = bookMapper.checkUpdateExist(book.getIsbn(),book.getId());
+        if(isExist){
+            throw new LibraryException(LibraryExceptionEnum.BOOK_EXIST);
+        }
         return bookMapper.updateBook(book);
     }
 

@@ -2,6 +2,8 @@ package com.library.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +30,11 @@ import com.library.common.core.page.TableDataInfo;
  * @date 2025-12-30
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/library/book")
 public class BookController extends BaseController
 {
-    @Autowired
-    private IBookService bookService;
+    private final IBookService bookService;
 
     /**
      * 查询图书基本信息列表
@@ -77,6 +79,7 @@ public class BookController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody Book book)
     {
+
         return toAjax(bookService.insertBook(book));
     }
 
@@ -99,6 +102,7 @@ public class BookController extends BaseController
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids)
     {
+
         return toAjax(bookService.deleteBookByIds(ids));
     }
 }

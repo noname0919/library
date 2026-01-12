@@ -39,6 +39,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectBookVo"/>
         where id = #{id}
     </select>
+    <select id="checkAddExist" resultType="java.lang.Boolean" parameterType="java.lang.String">
+        select count(1) from book where isbn = #{isbn}
+    </select>
+    <select id="checkUpdateExist" resultType="java.lang.Boolean">
+        select count(1) from book where isbn = #{isbn} and id != #{id}
+    </select>
 
     <insert id="insertBook" parameterType="Book" useGeneratedKeys="true" keyProperty="id">
         insert into book
