@@ -114,7 +114,12 @@ public class SecurityConfig
                 requests.antMatchers("/login", "/register", "/captchaImage").permitAll()
                     // 静态资源，可匿名访问
                     .antMatchers(HttpMethod.GET, "/", "/*.html", "/**/*.html", "/**/*.css", "/**/*.js", "/profile/**").permitAll()
+                    // Swagger和Druid监控
                     .antMatchers("/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/*/api-docs", "/druid/**").permitAll()
+                    // 允许OPTIONS请求
+                    .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    // 图书相关的API路径，允许匿名访问
+                    .antMatchers("/library/book/list", "/library/book/{id}").permitAll()
                     // 除上面外的所有请求全部需要鉴权认证
                     .anyRequest().authenticated();
             })
