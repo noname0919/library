@@ -48,7 +48,7 @@ public class Book extends BaseEntity
 
     /** 分类 */
     @NotNull(message = "分类不能为空")
-    @Excel(name = "分类")
+    @Excel(name = "分类", dictType = "library_category")
     private Long categoryId;
 
     /** 出版日期 */
@@ -65,7 +65,6 @@ public class Book extends BaseEntity
 
     /** 封面图片 */
     @NotBlank(message = "封面图片不能为空")
-    @Excel(name = "封面图片")
     private String image;
 
     /** 总馆藏数量 */
