@@ -17,7 +17,7 @@ public interface IBookService
      * @param id 图书基本信息主键
      * @return 图书基本信息
      */
-    public Book selectBookById(Long id);
+     Book selectBookById(Long id);
 
     /**
      * 查询图书基本信息列表
@@ -25,7 +25,7 @@ public interface IBookService
      * @param book 图书基本信息
      * @return 图书基本信息集合
      */
-    public List<Book> selectBookList(Book book);
+     List<Book> selectBookList(Book book);
 
     /**
      * 新增图书基本信息
@@ -33,7 +33,7 @@ public interface IBookService
      * @param book 图书基本信息
      * @return 结果
      */
-    public int insertBook(Book book);
+     int insertBook(Book book);
 
     /**
      * 修改图书基本信息
@@ -41,7 +41,7 @@ public interface IBookService
      * @param book 图书基本信息
      * @return 结果
      */
-    public int updateBook(Book book);
+    int updateBook(Book book);
 
     /**
      * 批量删除图书基本信息
@@ -49,7 +49,7 @@ public interface IBookService
      * @param ids 需要删除的图书基本信息主键集合
      * @return 结果
      */
-    public int deleteBookByIds(Long[] ids);
+     int deleteBookByIds(Long[] ids);
 
     /**
      * 删除图书基本信息信息
@@ -57,5 +57,5 @@ public interface IBookService
      * @param id 图书基本信息主键
      * @return 结果
      */
-    public int deleteBookById(Long id);
+     int deleteBookById(Long id);
 }

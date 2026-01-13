@@ -3,6 +3,7 @@ package com.library.mapper;
 import java.util.List;
 import com.library.domain.Book;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 图书基本信息Mapper接口
@@ -74,5 +75,5 @@ public interface BookMapper
      * @param id
      * @return
      */
-    boolean checkUpdateExist(String isbn, Long id);
+    boolean checkUpdateExist(@Param("isbn") String isbn, @Param("id") Long id);
 }
