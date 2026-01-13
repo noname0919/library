@@ -80,8 +80,8 @@
     </el-row>
 
     <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="图书ID" align="center" prop="id" />
+      <el-table-column type="selection" width="55" align="center" v-if="!isReader" />
+      <el-table-column label="图书ID" align="center" prop="id" v-if="!isReader" />
       <el-table-column label="ISBN号" align="center" prop="isbn" />
       <el-table-column label="图书名称" align="center" prop="bookName" />
       <el-table-column label="作者姓名" align="center" prop="authorName" />
@@ -106,12 +106,21 @@
           <image-preview :src="scope.row.image" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="总馆藏数量" align="center" prop="totalQuantity" />
-      <el-table-column label="可借数量" align="center" prop="availableQuantity" />
-      <el-table-column label="已借数量" align="center" prop="borrowedQuantity" />
-      <el-table-column label="图书状态" align="center" prop="status">
+      <!-- 只有非读者角色才显示馆藏数量相关信息 -->
+      <el-table-column v-if="!isReader" label="总馆藏数量" align="center" prop="totalQuantity" />
+      <el-table-column v-if="!isReader" label="可借数量" align="center" prop="availableQuantity" />
+      <el-table-column v-if="!isReader" label="已借数量" align="center" prop="borrowedQuantity" />
+      <el-table-column v-if="!isReader" label="图书状态" align="center" prop="status">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.book_status" :value="scope.row.status"/>
+        </template>
+      </el-table-column>
+      <!-- 读者角色只显示可借状态 -->
+      <el-table-column v-if="isReader" label="可借状态" align="center">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.availableQuantity > 0 ? 'success' : 'danger'">
+            {{ scope.row.availableQuantity > 0 ? '可借' : '不可借' }}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -212,6 +221,8 @@
 
 <script>
 import { listBook, getBook, delBook, addBook, updateBook } from "@/api/library/book"
+import { checkRole } from "@/utils/permission"
+import store from "@/store"
 
 export default {
   name: "Book",
@@ -236,6 +247,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否是读者角色
+      isReader: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -288,6 +301,8 @@ export default {
     }
   },
   created() {
+    // 检查当前用户是否是读者角色
+    this.isReader = store.getters.roles && store.getters.roles.includes('reader')
     this.getList()
   },
   methods: {
