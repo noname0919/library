@@ -28,13 +28,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectBookList" parameterType="Book" resultMap="BookResult">
         <include refid="selectBookVo"/>
-        <where>  
+        <where>
             <if test="isbn != null  and isbn != ''"> and isbn = #{isbn}</if>
             <if test="bookName != null  and bookName != ''"> and book_name like concat('%', #{bookName}, '%')</if>
             <if test="categoryId != null "> and category_id = #{categoryId}</if>
+            <if test="status != null and status != ''"> and status = #{status}</if>
         </where>
     </select>
-    
+
+
     <select id="selectBookById" parameterType="Long" resultMap="BookResult">
         <include refid="selectBookVo"/>
         where id = #{id}
