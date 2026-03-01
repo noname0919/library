@@ -193,15 +193,15 @@
         <el-form-item label="馆藏数量" prop="totalQuantity">
           <el-input v-model="form.totalQuantity" placeholder="请输入总馆藏数量" />
         </el-form-item>
-        <el-form-item label="可借数量" prop="availableQuantity">
+        <el-form-item v-if="form.id != null" label="可借数量" prop="availableQuantity">
           <el-input v-model="form.availableQuantity" placeholder="请输入可借数量" />
         </el-form-item>
-        <el-form-item label="已借数量" prop="borrowedQuantity">
+        <el-form-item v-if="form.id != null" label="已借数量" prop="borrowedQuantity">
           <el-input v-model="form.borrowedQuantity"
-                    :disabled="form.id != null"
+                    :disabled="true"
                     placeholder="请输入已借数量" />
         </el-form-item>
-        <el-form-item label="图书状态" prop="status">
+        <el-form-item v-if="form.id != null" label="图书状态" prop="status">
           <el-radio-group v-model="form.status">
             <el-radio
               v-for="dict in dict.type.book_status"
@@ -384,6 +384,10 @@ export default {
               this.getList()
             })
           } else {
+            // 新增时：可借数量与馆藏数量一致，已借数量为0，图书状态默认为下架(1)
+            this.form.availableQuantity = this.form.totalQuantity
+            this.form.borrowedQuantity = 0
+            this.form.status = '1'
             addBook(this.form).then(response => {
               this.$modal.msgSuccess("新增成功")
               this.open = false
