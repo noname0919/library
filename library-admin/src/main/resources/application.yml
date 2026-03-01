@@ -13,23 +13,6 @@ ruoyi:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
 
-# 阿里云OSS配置
-oss:
-  # 是否启用OSS
-  enabled: true
-  # OSS域名（注意：不要包含https://）
-  endpoint: oss-cn-hangzhou.aliyuncs.com
-  # 访问密钥ID
-  access-key-id: your_access_key_id
-  # 访问密钥Secret
-  access-key-secret: your_access_key_secret
-  # Bucket名称
-  bucket-name: your-bucket-name
-  # 自定义域名（CDN域名，可选）
-  custom-domain: https://your-domain.com
-  # OSS文件访问URL前缀（可选，与custom-domain二选一）
-  # file-url-prefix: https://your-domain.com/files
-
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
