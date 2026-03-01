@@ -47,6 +47,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="checkUpdateExist" resultType="java.lang.Boolean">
         select count(1) from book where isbn = #{isbn} and id != #{id}
     </select>
+    <select id="selectBookListByIds" resultType="com.library.domain.Book" parameterType="long[]">
+        <include refid="selectBookVo"/>
+        WHERE id IN
+        <foreach item="id" collection="ids" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </select>
+
 
     <insert id="insertBook" parameterType="Book" useGeneratedKeys="true" keyProperty="id">
         insert into book

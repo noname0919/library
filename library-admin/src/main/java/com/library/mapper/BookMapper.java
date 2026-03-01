@@ -76,4 +76,11 @@ public interface BookMapper
      * @return
      */
     boolean checkUpdateExist(@Param("isbn") String isbn, @Param("id") Long id);
+
+    /**
+     * 根据id批量查询图书记录
+     * @param ids
+     * @return
+     */
+    List<Book> selectBookListByIds(@Param("ids")Long[] ids);
 }
