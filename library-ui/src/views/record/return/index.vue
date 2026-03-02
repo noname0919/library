@@ -9,14 +9,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="读者账号" prop="userName">
-        <el-input
-          v-model="queryParams.userName"
-          placeholder="请输入读者账号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="归还时间">
         <el-date-picker
           v-model="dateRange"
@@ -53,16 +45,9 @@
       <el-table-column label="记录ID" align="center" prop="id" />
       <el-table-column label="图书名称" align="center" prop="bookName" />
       <el-table-column label="ISBN号" align="center" prop="isbn" />
-      <el-table-column label="读者账号" align="center" prop="userName" />
-      <el-table-column label="读者姓名" align="center" prop="nickName" />
       <el-table-column label="借阅时间" align="center" prop="borrowTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.borrowTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="应还日期" align="center" prop="dueDate" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.dueDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="归还时间" align="center" prop="updateTime" width="180">
@@ -70,7 +55,6 @@
           <span>{{ parseTime(scope.row.updateTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="续借次数" align="center" prop="renewCount" />
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
           <el-tag type="info">已归还</el-tag>
@@ -107,23 +91,11 @@
         <el-form-item label="ISBN号：">
           <span>{{ form.isbn }}</span>
         </el-form-item>
-        <el-form-item label="读者账号：">
-          <span>{{ form.userName }}</span>
-        </el-form-item>
-        <el-form-item label="读者姓名：">
-          <span>{{ form.nickName }}</span>
-        </el-form-item>
         <el-form-item label="借阅时间：">
           <span>{{ parseTime(form.borrowTime) }}</span>
         </el-form-item>
-        <el-form-item label="应还日期：">
-          <span>{{ parseTime(form.dueDate) }}</span>
-        </el-form-item>
         <el-form-item label="归还时间：">
           <span>{{ parseTime(form.updateTime) }}</span>
-        </el-form-item>
-        <el-form-item label="续借次数：">
-          <span>{{ form.renewCount }}</span>
         </el-form-item>
         <el-form-item label="状态：">
           <el-tag type="info">已归还</el-tag>
@@ -170,6 +142,9 @@ export default {
     };
   },
   created() {
+    this.getList();
+  },
+  activated() {
     this.getList();
   },
   methods: {

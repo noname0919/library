@@ -174,6 +174,9 @@ export default {
   created() {
     this.getList();
   },
+  activated() {
+    this.getList();
+  },
   methods: {
     /** 查询借阅记录列表 */
     getList() {

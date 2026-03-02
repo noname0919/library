@@ -188,9 +188,10 @@ public class BorrowRecordServiceImpl implements IBorrowRecordService {
         // 插入借阅记录
         borrowRecordMapper.insertBorrowRecord(borrowRecord);
 
-        // 更新图书数量
+        // 更新图书数量和借阅次数
         book.setAvailableQuantity(book.getAvailableQuantity() - 1);
         book.setBorrowedQuantity(book.getBorrowedQuantity() + 1);
+        book.setBorrowCount(book.getBorrowCount() == null ? 1 : book.getBorrowCount() + 1);
         book.setUpdateTime(DateUtils.getNowDate());
         bookMapper.updateBook(book);
 

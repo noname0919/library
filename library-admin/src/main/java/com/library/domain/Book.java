@@ -99,4 +99,9 @@ public class Book extends BaseEntity
     @ApiModelProperty(value = "当前借阅记录ID")
     private Long currentBorrowRecordId;
 
+    /** 借阅次数（用于推荐排序） */
+    @ApiModelProperty(value = "借阅次数")
+    @Excel(name = "借阅次数")
+    private Long borrowCount;
+
 }
