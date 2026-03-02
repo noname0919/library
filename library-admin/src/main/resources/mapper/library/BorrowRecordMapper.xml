@@ -129,4 +129,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and br.status = '0'
         limit 1
     </select>
+
+    <select id="selectDueSoonRecords" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where br.status = '0'
+          and br.due_date &lt;= #{dueDate}
+          and br.due_date &gt;= now()
+        order by br.due_date asc
+    </select>
+
+    <select id="selectOverdueRecords" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where br.status = '0'
+          and br.due_date &lt; now()
+        order by br.due_date asc
+    </select>
+
+    <select id="selectDueSoonRecordsByUserId" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where br.user_id = #{userId}
+          and br.status = '0'
+          and br.due_date &lt;= #{dueDate}
+          and br.due_date &gt;= now()
+        order by br.due_date asc
+    </select>
+
+    <select id="selectOverdueRecordsByUserId" resultMap="BorrowRecordResult">
+        <include refid="selectBorrowRecordVo"/>
+        where br.user_id = #{userId}
+          and br.status = '0'
+          and br.due_date &lt; now()
+        order by br.due_date asc
+    </select>
 </mapper>

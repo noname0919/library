@@ -1,6 +1,7 @@
 import router from '@/router'
 import { MessageBox, } from 'element-ui'
 import { login, logout, getInfo } from '@/api/login'
+import { getReminderInfo } from '@/api/library/reminder'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import { isHttp, isEmpty } from "@/utils/validate"
 import defAva from '@/assets/images/profile.jpg'
@@ -89,6 +90,23 @@ const user = {
               router.push({ name: 'Profile', params: { activeTab: 'resetPwd' } })
             }).catch(() => {})
           }
+          /* 借阅提醒 */
+          getReminderInfo().then(reminderRes => {
+            const reminder = reminderRes.data
+            if (reminder.hasReminder) {
+              let message = ''
+              if (reminder.overdueCount > 0) {
+                message += `您有 ${reminder.overdueCount} 本图书已逾期，请尽快归还！\n`
+              }
+              if (reminder.dueSoonCount > 0) {
+                message += `您有 ${reminder.dueSoonCount} 本图书即将到期，请及时归还或续借！`
+              }
+              MessageBox.alert(message, '借阅提醒', {
+                confirmButtonText: '我知道了',
+                type: 'warning'
+              })
+            }
+          })
           resolve(res)
         }).catch(error => {
           reject(error)

@@ -93,4 +93,36 @@ public interface BorrowRecordMapper {
      * @return 借阅记录，如果没有则返回null
      */
     BorrowRecord selectUserBorrowingBook(@Param("userId") Long userId, @Param("bookId") Long bookId);
+
+    /**
+     * 查询即将逾期的记录（剩余1天内到期）
+     * 
+     * @param dueDate 截止日期
+     * @return 借阅记录集合
+     */
+    List<BorrowRecord> selectDueSoonRecords(@Param("dueDate") java.util.Date dueDate);
+
+    /**
+     * 查询已逾期的记录
+     * 
+     * @return 借阅记录集合
+     */
+    List<BorrowRecord> selectOverdueRecords();
+
+    /**
+     * 查询指定用户即将逾期的记录
+     * 
+     * @param userId 用户ID
+     * @param dueDate 截止日期
+     * @return 借阅记录集合
+     */
+    List<BorrowRecord> selectDueSoonRecordsByUserId(@Param("userId") Long userId, @Param("dueDate") java.util.Date dueDate);
+
+    /**
+     * 查询指定用户已逾期的记录
+     * 
+     * @param userId 用户ID
+     * @return 借阅记录集合
+     */
+    List<BorrowRecord> selectOverdueRecordsByUserId(@Param("userId") Long userId);
 }
