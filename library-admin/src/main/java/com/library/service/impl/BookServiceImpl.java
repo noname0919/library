@@ -5,7 +5,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import com.aliyun.oss.*;
 import com.aliyun.oss.common.auth.CredentialsProviderFactory;
 import com.aliyun.oss.common.auth.EnvironmentVariableCredentialsProvider;
@@ -16,9 +15,9 @@ import com.library.common.exception.LibraryException;
 import com.library.common.exception.LibraryExceptionEnum;
 import com.library.common.utils.DateUtils;
 import com.library.common.utils.SecurityUtils;
+import com.library.domain.BorrowRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.library.mapper.BookMapper;
 import com.library.domain.Book;
@@ -38,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BookServiceImpl implements IBookService {
     private final BookMapper bookMapper;
     private final SysPermissionService permissionService;
+    private final com.library.service.IBorrowRecordService borrowRecordService;
 
     /**
      * 查询图书基本信息
@@ -61,15 +61,35 @@ public class BookServiceImpl implements IBookService {
     public List<Book> selectBookList(Book book) {
         // 检查当前用户角色，读者只能查看上架图书
         LoginUser loginUser = SecurityUtils.getLoginUser();
+        boolean isReader = false;
+        Long currentUserId = null;
         if (loginUser != null && loginUser.getUser() != null) {
+            currentUserId = loginUser.getUser().getUserId();
             // 使用permissionService获取用户角色集合
             Set<String> roles = permissionService.getRolePermission(loginUser.getUser());
             // 检查用户是否拥有读者角色
             if (roles != null && roles.contains("reader")) {
                 book.setStatus("0");
+                isReader = true;
             }
         }
-        return bookMapper.selectBookList(book);
+        List<Book> books = bookMapper.selectBookList(book);
+        
+        // 如果是读者角色，查询每本书的借阅状态
+        if (isReader && currentUserId != null) {
+            for (Book b : books) {
+                BorrowRecord borrowRecord = borrowRecordService.selectUserBorrowingBook(currentUserId, b.getId());
+                if (borrowRecord != null) {
+                    b.setIsBorrowedByCurrentUser(true);
+                    b.setCurrentBorrowRecordId(borrowRecord.getId());
+                } else {
+                    b.setIsBorrowedByCurrentUser(false);
+                    b.setCurrentBorrowRecordId(null);
+                }
+            }
+        }
+        
+        return books;
     }
 
 
@@ -210,5 +230,17 @@ public class BookServiceImpl implements IBookService {
     @Override
     public int deleteBookById(Long id) {
         return bookMapper.deleteBookById(id);
+    }
+
+    /**
+     * 借书
+     *
+     * @param bookId 图书ID
+     * @return 结果
+     */
+    @Override
+    @Transactional
+    public int borrowBook(Long bookId) {
+        return borrowRecordService.borrowBook(bookId);
     }
 }

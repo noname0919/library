@@ -3,6 +3,8 @@ package com.library.controller;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.library.common.core.domain.model.LoginUser;
+import com.library.common.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import com.library.common.core.domain.AjaxResult;
 import com.library.common.enums.BusinessType;
 import com.library.domain.Book;
 import com.library.service.IBookService;
+import com.library.service.IBorrowRecordService;
 import com.library.common.utils.poi.ExcelUtil;
 import com.library.common.core.page.TableDataInfo;
 
@@ -35,6 +38,7 @@ import com.library.common.core.page.TableDataInfo;
 public class BookController extends BaseController
 {
     private final IBookService bookService;
+    private final IBorrowRecordService borrowRecordService;
 
     /**
      * 查询图书基本信息列表
@@ -104,5 +108,25 @@ public class BookController extends BaseController
     {
 
         return toAjax(bookService.deleteBookByIds(ids));
+    }
+
+    /**
+     * 借书
+     */
+    @PreAuthorize("@ss.hasPermi('library:book:borrow')")
+    @Log(title = "借阅图书", businessType = BusinessType.INSERT)
+    @PostMapping("/borrow/{bookId}")
+    public AjaxResult borrow(@PathVariable Long bookId) {
+        return toAjax(bookService.borrowBook(bookId));
+    }
+
+    /**
+     * 还书
+     */
+    @PreAuthorize("@ss.hasPermi('library:book:return')")
+    @Log(title = "归还图书", businessType = BusinessType.UPDATE)
+    @PutMapping("/return/{recordId}")
+    public AjaxResult returnBook(@PathVariable Long recordId) {
+        return toAjax(borrowRecordService.returnBorrow(recordId));
     }
 }

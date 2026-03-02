@@ -93,6 +93,36 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
+    path: '/record',
+    component: Layout,
+    redirect: '/record/borrow',
+    name: 'Record',
+    meta: {
+      title: '借阅记录',
+      icon: '记录'
+    },
+    children: [
+      {
+        path: 'borrow',
+        component: () => import('@/views/record/borrow/index'),
+        name: 'BorrowRecord',
+        meta: {
+          title: '借书记录',
+          icon: '借书记录'
+        }
+      },
+      {
+        path: 'return',
+        component: () => import('@/views/record/return/index'),
+        name: 'ReturnRecord',
+        meta: {
+          title: '还书记录',
+          icon: '还书记录'
+        }
+      }
+    ]
+  },
+  {
     path: '/system/user-auth',
     component: Layout,
     hidden: true,

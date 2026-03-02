@@ -91,5 +91,12 @@ public class Book extends BaseEntity
     @Excel(name = "图书状态", readConverterExp = "0=上架,1=下架")
     private String status;
 
+    /** 当前用户是否已借阅该图书（非数据库字段） */
+    @ApiModelProperty(value = "当前用户是否已借阅")
+    private Boolean isBorrowedByCurrentUser;
+
+    /** 当前借阅记录ID（非数据库字段，用于还书） */
+    @ApiModelProperty(value = "当前借阅记录ID")
+    private Long currentBorrowRecordId;
 
 }

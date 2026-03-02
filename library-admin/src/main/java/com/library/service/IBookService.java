@@ -57,5 +57,13 @@ public interface IBookService
      * @param id 图书基本信息主键
      * @return 结果
      */
-     int deleteBookById(Long id);
+    int deleteBookById(Long id);
+
+    /**
+     * 借书
+     * 
+     * @param bookId 图书ID
+     * @return 结果
+     */
+    int borrowBook(Long bookId);
 }

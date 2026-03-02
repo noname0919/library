@@ -42,3 +42,19 @@ export function delBook(id) {
     method: 'delete'
   })
 }
+
+// 借书
+export function borrowBook(bookId) {
+  return request({
+    url: '/library/book/borrow/' + bookId,
+    method: 'post'
+  })
+}
+
+// 还书
+export function returnBook(recordId) {
+  return request({
+    url: '/library/book/return/' + recordId,
+    method: 'put'
+  })
+}

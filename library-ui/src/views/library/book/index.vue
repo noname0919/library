@@ -125,20 +125,46 @@
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['library:book:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['library:book:remove']"
-          >删除</el-button>
+          <!-- 管理员操作按钮 -->
+          <template v-if="!isReader">
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-edit"
+              @click="handleUpdate(scope.row)"
+              v-hasPermi="['library:book:edit']"
+            >修改</el-button>
+            <el-button
+              size="mini"
+              type="text"
+              icon="el-icon-delete"
+              @click="handleDelete(scope.row)"
+              v-hasPermi="['library:book:remove']"
+            >删除</el-button>
+          </template>
+          <!-- 读者操作按钮 -->
+          <template v-if="isReader">
+            <!-- 已借阅显示还书按钮 -->
+            <el-button
+              v-if="scope.row.isBorrowedByCurrentUser"
+              size="mini"
+              type="danger"
+              plain
+              icon="el-icon-check"
+              @click="handleReturn(scope.row)"
+            >还书</el-button>
+            <!-- 未借阅且可借显示借书按钮 -->
+            <el-button
+              v-else-if="scope.row.availableQuantity > 0"
+              size="mini"
+              type="success"
+              plain
+              icon="el-icon-reading"
+              @click="handleBorrow(scope.row)"
+            >借书</el-button>
+            <!-- 无库存显示暂无库存 -->
+            <span v-else style="color: #909399; font-size: 12px;">暂无库存</span>
+          </template>
         </template>
       </el-table-column>
     </el-table>
@@ -220,7 +246,7 @@
 </template>
 
 <script>
-import { listBook, getBook, delBook, addBook, updateBook } from "@/api/library/book"
+import { listBook, getBook, delBook, addBook, updateBook, borrowBook, returnBook } from "@/api/library/book"
 import { checkRole } from "@/utils/permission"
 import store from "@/store"
 
@@ -412,6 +438,24 @@ export default {
       this.download('library/book/export', {
         ...this.queryParams
       }, `book_${new Date().getTime()}.xlsx`)
+    },
+    /** 借书按钮操作 */
+    handleBorrow(row) {
+      this.$modal.confirm('确认借阅图书《' + row.bookName + '》吗？').then(() => {
+        return borrowBook(row.id)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess("借书成功")
+      }).catch(() => {})
+    },
+    /** 还书按钮操作 */
+    handleReturn(row) {
+      this.$modal.confirm('确认归还图书《' + row.bookName + '》吗？').then(() => {
+        return returnBook(row.currentBorrowRecordId)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess("还书成功")
+      }).catch(() => {})
     }
   }
 }
