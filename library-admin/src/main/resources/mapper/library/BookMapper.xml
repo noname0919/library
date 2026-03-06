@@ -127,4 +127,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <select id="selectRandomBooks" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        where status = '0'
+        order by RAND()
+        limit #{limit}
+    </select>
+
+    <select id="selectHotBooks" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        where status = '0'
+        order by borrow_count desc
+        limit #{limit}
+    </select>
+
+    <select id="selectBooksByKeywords" resultMap="BookResult">
+        <include refid="selectBookVo"/>
+        where status = '0'
+        <foreach item="keyword" collection="keywords" open="and (" separator=" or " close=")">
+            book_name like concat('%', #{keyword}, '%')
+            or author_name like concat('%', #{keyword}, '%')
+        </foreach>
+        order by borrow_count desc
+        limit #{limit}
+    </select>
 </mapper>

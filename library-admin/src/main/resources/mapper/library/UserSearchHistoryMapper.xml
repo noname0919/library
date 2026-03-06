@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.library.mapper.UserSearchHistoryMapper">
+
+    <resultMap type="com.library.domain.UserSearchHistory" id="UserSearchHistoryResult">
+        <id     property="historyId"       column="history_id"      />
+        <result property="userId"          column="user_id"         />
+        <result property="keyword"          column="keyword"          />
+        <result property="searchCount"       column="search_count"     />
+        <result property="lastSearchTime"    column="last_search_time"/>
+        <result property="createTime"       column="create_time"      />
+    </resultMap>
+
+    <sql id="selectUserSearchHistoryVo">
+        select history_id, user_id, keyword, search_count, last_search_time, create_time
+        from user_search_history
+    </sql>
+
+    <select id="selectByUserId" resultMap="UserSearchHistoryResult">
+        <include refid="selectUserSearchHistoryVo"/>
+        where user_id = #{userId}
+        order by last_search_time desc
+    </select>
+
+    <select id="selectHotKeywords" resultType="String">
+        select keyword
+        from user_search_history
+        where user_id = #{userId}
+        order by search_count desc, last_search_time desc
+        limit #{limit}
+    </select>
+
+    <insert id="insertOrUpdate">
+        insert into user_search_history (user_id, keyword, search_count, last_search_time, create_time)
+        values (#{userId}, #{keyword}, 1, now(), now())
+        on duplicate key update
+            search_count = search_count + 1,
+            last_search_time = now()
+    </insert>
+
+    <delete id="deleteByUserId">
+        delete from user_search_history where user_id = #{userId}
+    </delete>
+
+    <delete id="deleteAll">
+        delete from user_search_history
+    </delete>
+
+</mapper>

@@ -45,6 +45,8 @@
       <el-table-column label="借阅ID" align="center" prop="id" />
       <el-table-column label="图书名称" align="center" prop="bookName" />
       <el-table-column label="ISBN号" align="center" prop="isbn" />
+      <el-table-column label="读者账号" align="center" prop="userName" />
+      <el-table-column label="读者姓名" align="center" prop="nickName" />
       <el-table-column label="借阅时间" align="center" prop="borrowTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.borrowTime, '{y}-{m}-{d}') }}</span>
@@ -72,7 +74,7 @@
             @click="handleView(scope.row)"
           >详情</el-button>
           <el-button
-            v-if="scope.row.status === '0' && scope.row.renewCount < 3"
+            v-if="isReader && scope.row.status === '0' && scope.row.renewCount < 3"
             size="mini"
             type="text"
             icon="el-icon-refresh"
@@ -80,6 +82,7 @@
             v-hasPermi="['library:borrow:renew']"
           >续借</el-button>
           <el-button
+            v-if="isReader"
             size="mini"
             type="text"
             icon="el-icon-check"
@@ -143,6 +146,13 @@ import { returnBook } from "@/api/library/book";
 
 export default {
   name: "Borrow",
+  computed: {
+    // 判断当前用户是否是读者角色
+    isReader() {
+      const roles = this.$store.state.user.roles;
+      return roles && roles.includes('reader');
+    }
+  },
   data() {
     return {
       // 遮罩层

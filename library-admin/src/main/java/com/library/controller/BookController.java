@@ -7,7 +7,6 @@ import com.library.common.core.domain.model.LoginUser;
 import com.library.common.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,6 +22,7 @@ import com.library.common.enums.BusinessType;
 import com.library.domain.Book;
 import com.library.service.IBookService;
 import com.library.service.IBorrowRecordService;
+import com.library.service.IUserSearchHistoryService;
 import com.library.common.utils.poi.ExcelUtil;
 import com.library.common.core.page.TableDataInfo;
 
@@ -39,6 +39,7 @@ public class BookController extends BaseController
 {
     private final IBookService bookService;
     private final IBorrowRecordService borrowRecordService;
+    private final IUserSearchHistoryService userSearchHistoryService;
 
     /**
      * 查询图书基本信息列表
@@ -49,6 +50,16 @@ public class BookController extends BaseController
     {
         startPage();
         List<Book> list = bookService.selectBookList(book);
+        
+        try {
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            if (loginUser != null && book.getBookName() != null && !book.getBookName().trim().isEmpty()) {
+                userSearchHistoryService.recordSearch(loginUser.getUserId(), book.getBookName());
+            }
+        } catch (Exception e) {
+            logger.error("记录搜索历史失败", e);
+        }
+        
         return getDataTable(list);
     }
 

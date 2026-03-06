@@ -123,6 +123,27 @@ export const dynamicRoutes = [
     ]
   },
   {
+    path: '/library/recommend',
+    component: Layout,
+    redirect: '/library/recommend/index',
+    name: 'Recommend',
+    meta: {
+      title: '推荐图书',
+      icon: '推荐'
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/library/recommend/index'),
+        name: 'BookRecommend',
+        meta: {
+          title: '图书推荐',
+          icon: '图书推荐'
+        }
+      }
+    ]
+  },
+  {
     path: '/system/user-auth',
     component: Layout,
     hidden: true,

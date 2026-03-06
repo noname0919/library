@@ -45,6 +45,8 @@
       <el-table-column label="记录ID" align="center" prop="id" />
       <el-table-column label="图书名称" align="center" prop="bookName" />
       <el-table-column label="ISBN号" align="center" prop="isbn" />
+      <el-table-column label="读者账号" align="center" prop="userName" />
+      <el-table-column label="读者姓名" align="center" prop="nickName" />
       <el-table-column label="借阅时间" align="center" prop="borrowTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.borrowTime, '{y}-{m}-{d}') }}</span>
@@ -69,7 +71,7 @@
             icon="el-icon-view"
             @click="handleView(scope.row)"
             v-hasPermi="['library:borrow:query']"
-          >查看</el-button>
+          >详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -90,6 +92,12 @@
         </el-form-item>
         <el-form-item label="ISBN号：">
           <span>{{ form.isbn }}</span>
+        </el-form-item>
+        <el-form-item label="读者账号：">
+          <span>{{ form.userName }}</span>
+        </el-form-item>
+        <el-form-item label="读者姓名：">
+          <span>{{ form.nickName }}</span>
         </el-form-item>
         <el-form-item label="借阅时间：">
           <span>{{ parseTime(form.borrowTime) }}</span>

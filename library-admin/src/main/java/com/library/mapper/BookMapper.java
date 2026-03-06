@@ -83,4 +83,29 @@ public interface BookMapper
      * @return
      */
     List<Book> selectBookListByIds(@Param("ids")Long[] ids);
+
+    /**
+     * 随机推荐图书
+     * 
+     * @param limit 推荐数量
+     * @return 图书列表
+     */
+    List<Book> selectRandomBooks(@Param("limit") Integer limit);
+
+    /**
+     * 热门推荐图书（按借阅次数）
+     * 
+     * @param limit 推荐数量
+     * @return 图书列表
+     */
+    List<Book> selectHotBooks(@Param("limit") Integer limit);
+
+    /**
+     * 关键词推荐图书
+     * 
+     * @param keywords 关键词列表
+     * @param limit 推荐数量
+     * @return 图书列表
+     */
+    List<Book> selectBooksByKeywords(@Param("keywords") List<String> keywords, @Param("limit") Integer limit);
 }
