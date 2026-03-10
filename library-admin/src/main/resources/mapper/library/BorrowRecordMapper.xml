@@ -161,4 +161,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
           and br.due_date &lt; now()
         order by br.due_date asc
     </select>
+
+    <select id="countTodayBorrow" resultType="java.lang.Integer">
+        select count(1)
+        from borrow_record
+        where date(borrow_time) = date(#{today})
+    </select>
+
+    <select id="countTodayReturn" resultType="java.lang.Integer">
+        select count(1)
+        from borrow_record
+        where status = '1'
+          and date(update_time) = date(#{today})
+    </select>
+
+    <select id="countOverdue" resultType="java.lang.Integer">
+        select count(1)
+        from borrow_record
+        where status = '0'
+          and due_date &lt; now()
+    </select>
 </mapper>

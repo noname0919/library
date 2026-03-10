@@ -125,4 +125,27 @@ public interface BorrowRecordMapper {
      * @return 借阅记录集合
      */
     List<BorrowRecord> selectOverdueRecordsByUserId(@Param("userId") Long userId);
+
+    /**
+     * 统计今日借阅数量
+     * 
+     * @param today 今天日期
+     * @return 借阅数量
+     */
+    int countTodayBorrow(@Param("today") String today);
+
+    /**
+     * 统计今日归还数量
+     * 
+     * @param today 今天日期
+     * @return 归还数量
+     */
+    int countTodayReturn(@Param("today") String today);
+
+    /**
+     * 统计逾期未还数量
+     * 
+     * @return 逾期数量
+     */
+    int countOverdue();
 }

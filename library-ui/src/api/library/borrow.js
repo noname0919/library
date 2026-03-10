@@ -18,6 +18,15 @@ export function listReturn(query) {
   })
 }
 
+// 查询所有借阅记录（包括已归还）
+export function listAllBorrow(query) {
+  return request({
+    url: '/library/borrow/list',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询借阅记录详细
 export function getBorrow(id) {
   return request({

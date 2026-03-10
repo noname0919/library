@@ -3,13 +3,57 @@
     <!-- 核心数据统计卡片 -->
     <el-row :gutter="20" class="panel-group">
       <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-        <div class="card-panel">
+        <div class="card-panel" @click="handleClick('book')">
           <div class="card-panel-icon-wrapper icon-book">
             <i class="el-icon-reading card-panel-icon" />
           </div>
           <div class="card-panel-description">
             <div class="card-panel-text">图书总量</div>
             <count-to :start-val="0" :end-val="statistics.totalBooks || 0" :duration="2600" class="card-panel-num" />
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+        <div class="card-panel" @click="handleClick('user')">
+          <div class="card-panel-icon-wrapper icon-user">
+            <i class="el-icon-user card-panel-icon" />
+          </div>
+          <div class="card-panel-description">
+            <div class="card-panel-text">用户总数</div>
+            <count-to :start-val="0" :end-val="statistics.totalUsers || 0" :duration="2600" class="card-panel-num" />
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+        <div class="card-panel" @click="handleClick('todayBorrow')">
+          <div class="card-panel-icon-wrapper icon-borrow">
+            <i class="el-icon-s-order card-panel-icon" />
+          </div>
+          <div class="card-panel-description">
+            <div class="card-panel-text">今日借阅</div>
+            <count-to :start-val="0" :end-val="statistics.todayBorrow || 0" :duration="2600" class="card-panel-num" />
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+        <div class="card-panel" @click="handleClick('todayReturn')">
+          <div class="card-panel-icon-wrapper icon-return">
+            <i class="el-icon-refresh-left card-panel-icon" />
+          </div>
+          <div class="card-panel-description">
+            <div class="card-panel-text">今日归还</div>
+            <count-to :start-val="0" :end-val="statistics.todayReturn || 0" :duration="2600" class="card-panel-num" />
+          </div>
+        </div>
+      </el-col>
+      <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
+        <div class="card-panel" @click="handleClick('overdue')">
+          <div class="card-panel-icon-wrapper icon-overdue">
+            <i class="el-icon-warning card-panel-icon" />
+          </div>
+          <div class="card-panel-description">
+            <div class="card-panel-text">逾期未还</div>
+            <count-to :start-val="0" :end-val="statistics.overdueCount || 0" :duration="2600" class="card-panel-num" />
           </div>
         </div>
       </el-col>
@@ -26,12 +70,64 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 今日借阅记录弹窗 -->
+    <el-dialog title="今日借阅记录" :visible.sync="todayBorrowDialogVisible" width="900px">
+      <el-table :data="todayBorrowRecords" v-loading="dialogLoading">
+        <el-table-column label="图书名称" prop="bookName" />
+        <el-table-column label="ISBN" prop="isbn" />
+        <el-table-column label="读者账号" prop="userName" />
+        <el-table-column label="读者姓名" prop="nickName" />
+        <el-table-column label="借阅时间" prop="borrowTime" width="160" />
+        <el-table-column label="应还日期" prop="dueDate" width="100">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.dueDate, '{y}-{m}-{d}') }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" prop="status" width="80">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.status === '0'" type="success">借阅中</el-tag>
+            <el-tag v-else-if="scope.row.status === '1'" type="info">已归还</el-tag>
+            <el-tag v-else-if="scope.row.status === '2'" type="danger">已逾期</el-tag>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
+
+    <!-- 今日归还记录弹窗 -->
+    <el-dialog title="今日归还记录" :visible.sync="todayReturnDialogVisible" width="900px">
+      <el-table :data="todayReturnRecords" v-loading="dialogLoading">
+        <el-table-column label="图书名称" prop="bookName" />
+        <el-table-column label="ISBN" prop="isbn" />
+        <el-table-column label="读者账号" prop="userName" />
+        <el-table-column label="读者姓名" prop="nickName" />
+        <el-table-column label="借阅时间" prop="borrowTime" width="160" />
+        <el-table-column label="归还时间" prop="updateTime" width="160" />
+      </el-table>
+    </el-dialog>
+
+    <!-- 逾期未还记录弹窗 -->
+    <el-dialog title="逾期未还记录" :visible.sync="overdueDialogVisible" width="900px">
+      <el-table :data="overdueRecords" v-loading="dialogLoading">
+        <el-table-column label="图书名称" prop="bookName" />
+        <el-table-column label="ISBN" prop="isbn" />
+        <el-table-column label="读者账号" prop="userName" />
+        <el-table-column label="读者姓名" prop="nickName" />
+        <el-table-column label="借阅时间" prop="borrowTime" width="160" />
+        <el-table-column label="应还日期" prop="dueDate" width="100">
+          <template slot-scope="scope">
+            <span style="color: #f56c6c; font-weight: bold;">{{ parseTime(scope.row.dueDate, '{y}-{m}-{d}') }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import CountTo from 'vue-count-to'
 import { getDashboardStatistics } from "@/api/library/dashboard"
+import { listAllBorrow, listReturn, listBorrow } from "@/api/library/borrow"
 import * as echarts from 'echarts'
 
 export default {
@@ -43,9 +139,21 @@ export default {
     return {
       statistics: {
         totalBooks: 0,
+        totalUsers: 0,
+        todayBorrow: 0,
+        todayReturn: 0,
+        overdueCount: 0,
         categoryStats: []
       },
-      categoryChart: null
+      categoryChart: null,
+      // 弹窗相关
+      todayBorrowDialogVisible: false,
+      todayReturnDialogVisible: false,
+      overdueDialogVisible: false,
+      dialogLoading: false,
+      todayBorrowRecords: [],
+      todayReturnRecords: [],
+      overdueRecords: []
     }
   },
   created() {
@@ -62,6 +170,69 @@ export default {
     }
   },
   methods: {
+    // 点击卡片
+    handleClick(type) {
+      switch (type) {
+        case 'book':
+          this.$router.push('/library/book')
+          break
+        case 'user':
+          this.$router.push('/system/user')
+          break
+        case 'todayBorrow':
+          this.showTodayBorrowRecords()
+          break
+        case 'todayReturn':
+          this.showTodayReturnRecords()
+          break
+        case 'overdue':
+          this.showOverdueRecords()
+          break
+      }
+    },
+    // 显示今日借阅记录（包括已归还的）
+    showTodayBorrowRecords() {
+      this.todayBorrowDialogVisible = true
+      this.dialogLoading = true
+      const today = this.parseTime(new Date(), '{y}-{m}-{d}')
+      listAllBorrow({
+        params: { beginTime: today, endTime: today }
+      }).then(response => {
+        this.todayBorrowRecords = response.rows
+        this.dialogLoading = false
+      }).catch(() => {
+        this.dialogLoading = false
+      })
+    },
+    // 显示今日归还记录
+    showTodayReturnRecords() {
+      this.todayReturnDialogVisible = true
+      this.dialogLoading = true
+      const today = this.parseTime(new Date(), '{y}-{m}-{d}')
+      listReturn({
+        params: { beginTime: today, endTime: today }
+      }).then(response => {
+        this.todayReturnRecords = response.rows
+        this.dialogLoading = false
+      }).catch(() => {
+        this.dialogLoading = false
+      })
+    },
+    // 显示逾期未还记录（查询已逾期的，后端已实时计算status）
+    showOverdueRecords() {
+      this.overdueDialogVisible = true
+      this.dialogLoading = true
+      // 查询所有借阅中的记录，后端已实时计算status，直接过滤status='2'的即可
+      listBorrow({}).then(response => {
+        this.overdueRecords = response.rows.filter(record => {
+          // 后端已实时计算status，逾期记录status='2'
+          return record.status === '2'
+        })
+        this.dialogLoading = false
+      }).catch(() => {
+        this.dialogLoading = false
+      })
+    },
     getStatistics() {
       getDashboardStatistics().then(response => {
         this.statistics = response.data
@@ -170,10 +341,42 @@ export default {
       .icon-book {
         background: #40c9c6;
       }
+
+      .icon-user {
+        background: #36a2eb;
+      }
+
+      .icon-borrow {
+        background: #ff6384;
+      }
+
+      .icon-return {
+        background: #4bc0c0;
+      }
+
+      .icon-overdue {
+        background: #ff9f40;
+      }
     }
 
     .icon-book {
       color: #40c9c6;
+    }
+
+    .icon-user {
+      color: #36a2eb;
+    }
+
+    .icon-borrow {
+      color: #ff6384;
+    }
+
+    .icon-return {
+      color: #4bc0c0;
+    }
+
+    .icon-overdue {
+      color: #ff9f40;
     }
 
     .card-panel-icon-wrapper {
