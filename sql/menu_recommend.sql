@@ -19,7 +19,3 @@ VALUES (2067, '热门推荐', 2064, 3, '', '', 0, 0, 'F', '0', '0', 'library:rec
 -- 4. 关键词推荐
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
 VALUES (2068, '关键词推荐', 2064, 4, '', '', 0, 0, 'F', '0', '0', 'library:recommend:keyword', '#', 'admin', NOW(), '', NOW(), '');
-
--- 5. 综合推荐
-INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark)
-VALUES (2069, '综合推荐', 2064, 5, '', '', 0, 0, 'F', '0', '0', 'library:recommend:all', '#', 'admin', NOW(), '', NOW(), '');

@@ -23,11 +23,3 @@ export function keywordRecommend(limit) {
     params: { limit }
   })
 }
-
-export function mixedRecommend(limit) {
-  return request({
-    url: '/library/recommend/all',
-    method: 'get',
-    params: { limit }
-  })
-}

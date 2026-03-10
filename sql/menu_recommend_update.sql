@@ -22,5 +22,4 @@ INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component,
 VALUES 
 (2066, '随机推荐', 2065, 1, '', '', 0, 0, 'F', '0', '0', 'library:recommend:random', '#', 'admin', NOW(), '', NOW(), ''),
 (2067, '热门推荐', 2065, 2, '', '', 0, 0, 'F', '0', '0', 'library:recommend:hot', '#', 'admin', NOW(), '', NOW(), ''),
-(2068, '关键词推荐', 2065, 3, '', '', 0, 0, 'F', '0', '0', 'library:recommend:keyword', '#', 'admin', NOW(), '', NOW(), ''),
-(2069, '综合推荐', 2065, 4, '', '', 0, 0, 'F', '0', '0', 'library:recommend:all', '#', 'admin', NOW(), '', NOW(), '');
+(2068, '关键词推荐', 2065, 3, '', '', 0, 0, 'F', '0', '0', 'library:recommend:keyword', '#', 'admin', NOW(), '', NOW(), '');

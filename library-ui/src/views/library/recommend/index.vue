@@ -1,16 +1,8 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="推荐类型" prop="recommendType">
-        <el-select v-model="queryParams.recommendType" placeholder="请选择推荐类型" clearable @change="handleRecommendChange">
-          <el-option label="随机推荐" value="random" />
-          <el-option label="热门推荐" value="hot" />
-          <el-option label="关键词推荐" value="keyword" />
-          <el-option label="综合推荐" value="all" />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-refresh" size="mini" @click="handleQuery">刷新推荐</el-button>
+      <el-form-item label="当前推荐类型" prop="recommendType" label-width="100px">
+        <el-input v-model="currentRecommendTypeText" disabled style="width: 120px;" />
       </el-form-item>
     </el-form>
 
@@ -45,40 +37,61 @@
           v-hasPermi="['library:recommend:keyword']"
         >关键词推荐</el-button>
       </el-col>
-      <el-col :span="1.5">
+
+      <el-col :span="1.5" style="margin-left: auto;">
         <el-button
-          type="info"
+          type="default"
           plain
-          icon="el-icon-menu"
+          icon="el-icon-info"
           size="mini"
-          @click="getMixedRecommend"
-          v-hasPermi="['library:recommend:all']"
-        >综合推荐</el-button>
+          @click="openRuleDialog"
+        >推荐规则</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="bookList">
-      <el-table-column label="图书ID" align="center" prop="id" />
       <el-table-column label="ISBN号" align="center" prop="isbn" />
       <el-table-column label="图书名称" align="center" prop="bookName" :show-overflow-tooltip="true" />
-      <el-table-column label="作者" align="center" prop="authorName" />
-      <el-table-column label="出版社" align="center" prop="publisherName" :show-overflow-tooltip="true" />
+      <el-table-column label="作者姓名" align="center" prop="authorName" />
+      <el-table-column label="出版社名称" align="center" prop="publisherName" :show-overflow-tooltip="true" />
       <el-table-column label="分类" align="center" prop="categoryId">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.library_category" :value="scope.row.categoryId"/>
         </template>
       </el-table-column>
-      <el-table-column label="价格" align="center" prop="price">
+      <el-table-column label="出版日期" align="center" prop="publishDate" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.publishDate, '{y}-{m}-{d}') }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="图书价格" align="center">
         <template slot-scope="scope">
           <span>¥{{ scope.row.price }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="借阅次数" align="center" prop="borrowCount" sortable />
-      <el-table-column label="可借数量" align="center" prop="availableQuantity">
+      <el-table-column label="封面图片" align="center" prop="image" width="100">
+        <template slot-scope="scope">
+          <image-preview :src="scope.row.image" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <!-- 热门推荐时显示借阅次数（所有角色） -->
+      <el-table-column v-if="isHotRecommend" label="借阅次数" align="center" prop="borrowCount" sortable />
+      <!-- 非热门推荐且非读者角色显示借阅次数 -->
+      <el-table-column v-if="!isHotRecommend && !isReader" label="借阅次数" align="center" prop="borrowCount" sortable />
+      <!-- 非读者角色显示可借数量 -->
+      <el-table-column v-if="!isReader" label="可借数量" align="center" prop="availableQuantity">
         <template slot-scope="scope">
           <el-tag :type="scope.row.availableQuantity > 0 ? 'success' : 'danger'" size="small">
             {{ scope.row.availableQuantity }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <!-- 读者角色显示可借状态（包括热门推荐时） -->
+      <el-table-column v-if="isReader" label="可借状态" align="center">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.availableQuantity > 0 ? 'success' : 'danger'">
+            {{ scope.row.availableQuantity > 0 ? '可借' : '不可借' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -148,16 +161,54 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 推荐规则对话框 -->
+    <el-dialog title="推荐规则说明" :visible.sync="ruleDialogVisible" width="600px" append-to-body>
+      <div class="rule-content">
+        <h4>1. 随机推荐</h4>
+        <p>从所有上架图书中随机选择，适合发现新图书。</p>
+        
+        <h4>2. 热门推荐</h4>
+        <p>基于图书的借阅次数排序，推荐最受欢迎的图书。</p>
+        
+        <h4>3. 关键词推荐</h4>
+        <p>根据您的搜索历史，推荐与您常搜索的关键词相关的图书。</p>
+
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="ruleDialogVisible = false">我知道了</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { randomRecommend, hotRecommend, keywordRecommend, mixedRecommend } from "@/api/library/recommend"
+import { randomRecommend, hotRecommend, keywordRecommend } from "@/api/library/recommend"
 import { borrowBook } from "@/api/library/book"
 
 export default {
   name: "Recommend",
   dicts: ['library_category'],
+  computed: {
+    // 判断当前用户是否是读者角色
+    isReader() {
+      const roles = this.$store.state.user.roles;
+      return roles && roles.includes('reader');
+    },
+    // 判断是否是热门推荐
+    isHotRecommend() {
+      return this.queryParams.recommendType === 'hot';
+    },
+    // 当前推荐类型文本
+    currentRecommendTypeText() {
+      const typeMap = {
+        'random': '随机推荐',
+        'hot': '热门推荐',
+        'keyword': '关键词推荐'
+      };
+      return typeMap[this.queryParams.recommendType] || '随机推荐';
+    }
+  },
   data() {
     return {
       loading: false,
@@ -166,6 +217,7 @@ export default {
       total: 0,
       title: "",
       open: false,
+      ruleDialogVisible: false,
       form: {},
       queryParams: {
         pageNum: 1,
@@ -189,9 +241,6 @@ export default {
           break
         case 'keyword':
           this.getKeywordRecommend()
-          break
-        case 'all':
-          this.getMixedRecommend()
           break
         default:
           this.getRandomRecommend()
@@ -232,15 +281,6 @@ export default {
         this.loading = false
       })
     },
-    getMixedRecommend() {
-      this.loading = true
-      this.queryParams.recommendType = 'all'
-      mixedRecommend(this.queryParams.pageSize).then(response => {
-        this.bookList = response.data
-        this.total = response.data.length
-        this.loading = false
-      })
-    },
     handleView(row) {
       this.form = row
       this.title = "图书详情"
@@ -261,7 +301,10 @@ export default {
     cancel() {
       this.open = false
       this.form = {}
+    },
+    openRuleDialog() {
+      this.ruleDialogVisible = true
     }
   }
-}
+};
 </script>

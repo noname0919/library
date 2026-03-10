@@ -71,18 +71,4 @@ public class RecommendController extends BaseController {
         return AjaxResult.success(books);
     }
 
-    /**
-     * 综合推荐
-     * 
-     * @param limit 推荐数量，默认10
-     * @return 图书列表
-     */
-    @PreAuthorize("@ss.hasPermi('library:recommend:all')")
-    @Log(title = "图书推荐", businessType = BusinessType.OTHER)
-    @GetMapping("/all")
-    public AjaxResult mixedRecommend(@RequestParam(defaultValue = "10") Integer limit) {
-        Long userId = getUserId();
-        List<Book> books = recommendService.mixedRecommend(userId, limit);
-        return AjaxResult.success(books);
-    }
 }

@@ -61,32 +61,4 @@ public class RecommendServiceImpl implements IRecommendService {
         
         return books;
     }
-
-    @Override
-    public List<Book> mixedRecommend(Long userId, Integer limit) {
-        List<Book> result = new ArrayList<>();
-        
-        int randomCount = limit / 3;
-        int hotCount = limit / 3;
-        int keywordCount = limit - randomCount - hotCount;
-        
-        List<Book> randomBooks = randomRecommend(randomCount);
-        List<Book> hotBooks = hotRecommend(hotCount);
-        List<Book> keywordBooks = keywordRecommend(userId, keywordCount);
-        
-        result.addAll(randomBooks);
-        result.addAll(hotBooks);
-        result.addAll(keywordBooks);
-        
-        Collections.shuffle(result);
-        
-        if (result.size() > limit) {
-            result = result.subList(0, limit);
-        }
-        
-        log.info("综合推荐图书，用户ID：{}，随机：{}，热门：{}，关键词：{}，总计：{}", 
-                userId, randomCount, hotCount, keywordCount, result.size());
-        
-        return result;
-    }
 }

@@ -37,12 +37,4 @@ public interface IRecommendService {
      */
     List<Book> keywordRecommend(Long userId, Integer limit);
 
-    /**
-     * 综合推荐（混合三种推荐方式）
-     * 
-     * @param userId 用户ID
-     * @param limit 推荐数量
-     * @return 图书列表
-     */
-    List<Book> mixedRecommend(Long userId, Integer limit);
 }
