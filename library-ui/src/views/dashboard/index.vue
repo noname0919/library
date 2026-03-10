@@ -145,6 +145,7 @@ export default {
         overdueCount: 0,
         categoryStats: []
       },
+      isAdmin: false,
       categoryChart: null,
       // 弹窗相关
       todayBorrowDialogVisible: false,
@@ -157,6 +158,7 @@ export default {
     }
   },
   created() {
+    this.isAdmin = this.checkIsAdmin()
     this.getStatistics()
   },
   mounted() {
@@ -170,6 +172,11 @@ export default {
     }
   },
   methods: {
+    // 检查是否是超级管理员
+    checkIsAdmin() {
+      const roles = this.$store.getters.roles
+      return roles && roles.includes('admin')
+    },
     // 点击卡片
     handleClick(type) {
       switch (type) {
@@ -177,7 +184,11 @@ export default {
           this.$router.push('/library/book')
           break
         case 'user':
-          this.$router.push('/system/user')
+          if (this.isAdmin) {
+            this.$router.push('/system/user')
+          } else {
+            this.$modal.msgWarning('只有超级管理员才能查看用户管理')
+          }
           break
         case 'todayBorrow':
           this.showTodayBorrowRecords()
