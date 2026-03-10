@@ -152,4 +152,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by borrow_count desc
         limit #{limit}
     </select>
+
+    <select id="selectTotalCount" resultType="java.lang.Long">
+        select count(*) from book
+    </select>
+
+    <select id="selectCategoryStats" resultType="java.util.HashMap">
+        select
+            d.dict_label as name,
+            count(b.id) as value
+        from book b
+        left join sys_dict_data d on b.category_id = d.dict_value and d.dict_type = 'book_category'
+        group by b.category_id, d.dict_label
+        order by value desc
+    </select>
 </mapper>

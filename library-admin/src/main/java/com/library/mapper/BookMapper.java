@@ -1,6 +1,7 @@
 package com.library.mapper;
 
 import java.util.List;
+import java.util.Map;
 import com.library.domain.Book;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -108,4 +109,18 @@ public interface BookMapper
      * @return 图书列表
      */
     List<Book> selectBooksByKeywords(@Param("keywords") List<String> keywords, @Param("limit") Integer limit);
+
+    /**
+     * 查询图书总数
+     *
+     * @return 图书总数
+     */
+    Long selectTotalCount();
+
+    /**
+     * 查询图书分类统计
+     *
+     * @return 分类统计数据
+     */
+    List<Map<String, Object>> selectCategoryStats();
 }
