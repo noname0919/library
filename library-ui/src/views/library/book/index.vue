@@ -181,7 +181,10 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="ISBN号" prop="isbn">
-          <el-input v-model="form.isbn" placeholder="请输入ISBN号" />
+          <el-input v-model="form.isbn" placeholder="请输入ISBN号（支持10/13位）" @input="validateISBN" @blur="validateISBN" />
+          <div v-if="isbnValidation.show" :class="['isbn-validation', isbnValidation.valid ? 'valid' : 'invalid']">
+            {{ isbnValidation.message }}
+          </div>
         </el-form-item>
         <el-form-item label="图书名称" prop="bookName">
           <el-input v-model="form.bookName" placeholder="请输入图书名称" />
@@ -211,16 +214,16 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="图书价格" prop="price">
-          <el-input v-model="form.price" placeholder="请输入图书价格" />
+          <el-input v-model="form.price" placeholder="请输入图书价格（仅支持数字）" @input="validatePrice" />
         </el-form-item>
         <el-form-item label="封面图片" prop="image">
           <image-upload v-model="form.image"/>
         </el-form-item>
         <el-form-item label="馆藏数量" prop="totalQuantity">
-          <el-input v-model="form.totalQuantity" placeholder="请输入总馆藏数量" />
+          <el-input v-model="form.totalQuantity" placeholder="请输入总馆藏数量（仅支持数字）" @input="validateNumber('totalQuantity')" />
         </el-form-item>
         <el-form-item v-if="form.id != null" label="可借数量" prop="availableQuantity">
-          <el-input v-model="form.availableQuantity" placeholder="请输入可借数量" />
+          <el-input v-model="form.availableQuantity" placeholder="请输入可借数量（仅支持数字）" @input="validateNumber('availableQuantity')" />
         </el-form-item>
         <el-form-item v-if="form.id != null" label="已借数量" prop="borrowedQuantity">
           <el-input v-model="form.borrowedQuantity"
@@ -275,6 +278,12 @@ export default {
       open: false,
       // 是否是读者角色
       isReader: false,
+      // ISBN校验结果
+      isbnValidation: {
+        show: false,
+        valid: false,
+        message: ''
+      },
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -332,6 +341,143 @@ export default {
     this.getList()
   },
   methods: {
+    // 数字校验（只允许正整数）
+    validateNumber(field) {
+      if (this.form[field]) {
+        // 只保留数字
+        this.form[field] = this.form[field].replace(/\D/g, '')
+      }
+    },
+    // 价格校验（只允许数字和小数点）
+    validatePrice() {
+      if (this.form.price) {
+        // 只保留数字和小数点
+        let value = this.form.price.replace(/[^\d.]/g, '')
+        // 只保留第一个小数点
+        const parts = value.split('.')
+        if (parts.length > 2) {
+          value = parts[0] + '.' + parts.slice(1).join('')
+        }
+        // 限制小数点后最多两位
+        if (parts.length === 2 && parts[1].length > 2) {
+          value = parts[0] + '.' + parts[1].substring(0, 2)
+        }
+        this.form.price = value
+      }
+    },
+    // ISBN校验
+    validateISBN() {
+      const isbn = this.form.isbn
+      if (!isbn || !isbn.trim()) {
+        this.isbnValidation = {
+          show: false,
+          valid: false,
+          message: ''
+        }
+        return false
+      }
+
+      // 清理输入（移除所有非数字/非X字符）
+      const cleaned = isbn.replace(/[^0-9Xx]/g, '').toUpperCase()
+
+      if (cleaned.length === 13) {
+        // 校验ISBN-13
+        const prefix = cleaned.substring(0, 3)
+        if (prefix !== '978' && prefix !== '979') {
+          this.isbnValidation = {
+            show: true,
+            valid: false,
+            message: 'ISBN-13前缀必须是978或979'
+          }
+          return false
+        }
+
+        // 计算ISBN-13校验码
+        let sum = 0
+        for (let i = 0; i < 12; i++) {
+          const digit = parseInt(cleaned[i])
+          if (isNaN(digit)) {
+            this.isbnValidation = {
+              show: true,
+              valid: false,
+              message: 'ISBN-13仅允许数字'
+            }
+            return false
+          }
+          sum += digit * (i % 2 === 0 ? 1 : 3)
+        }
+        const checkDigit = (10 - (sum % 10)) % 10
+        const actualCheckDigit = parseInt(cleaned[12])
+
+        if (actualCheckDigit === checkDigit) {
+          this.isbnValidation = {
+            show: true,
+            valid: true,
+            message: 'ISBN-13校验通过'
+          }
+          return true
+        } else {
+          this.isbnValidation = {
+            show: true,
+            valid: false,
+            message: `ISBN-13校验失败：正确校验码应为${checkDigit}`
+          }
+          return false
+        }
+      } else if (cleaned.length === 10) {
+        // 校验ISBN-10
+        const first9Digits = cleaned.substring(0, 9)
+        const lastChar = cleaned[9]
+
+        if (!/^\d{9}$/.test(first9Digits)) {
+          this.isbnValidation = {
+            show: true,
+            valid: false,
+            message: 'ISBN-10前9位必须都是数字'
+          }
+          return false
+        }
+
+        // 计算ISBN-10校验码
+        let sum = 0
+        for (let i = 0; i < 9; i++) {
+          sum += parseInt(first9Digits[i]) * (10 - i)
+        }
+        const checkValue = 11 - (sum % 11)
+        let expectedCheckDigit
+        if (checkValue === 10) {
+          expectedCheckDigit = 'X'
+        } else if (checkValue === 11) {
+          expectedCheckDigit = '0'
+        } else {
+          expectedCheckDigit = checkValue.toString()
+        }
+
+        if (lastChar === expectedCheckDigit) {
+          this.isbnValidation = {
+            show: true,
+            valid: true,
+            message: 'ISBN-10校验通过'
+          }
+          return true
+        } else {
+          this.isbnValidation = {
+            show: true,
+            valid: false,
+            message: `ISBN-10校验失败：正确校验码应为${expectedCheckDigit}`
+          }
+          return false
+        }
+      } else if (cleaned.length > 0) {
+        this.isbnValidation = {
+          show: true,
+          valid: false,
+          message: `仅支持10位或13位ISBN`
+        }
+        return false
+      }
+      return false
+    },
     /** 查询图书基本信息列表 */
     getList() {
       this.loading = true
@@ -366,6 +512,12 @@ export default {
         updateTime: null
       }
       this.resetForm("form")
+      // 清空ISBN校验结果
+      this.isbnValidation = {
+        show: false,
+        valid: false,
+        message: ''
+      }
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -403,6 +555,11 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          // 校验ISBN是否有效
+          if (!this.isbnValidation.valid) {
+            this.$modal.msgWarning("请输入有效的ISBN号码")
+            return
+          }
           if (this.form.id != null) {
             updateBook(this.form).then(response => {
               this.$modal.msgSuccess("修改成功")
@@ -460,3 +617,24 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.isbn-validation {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.isbn-validation.valid {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.isbn-validation.invalid {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+</style>
