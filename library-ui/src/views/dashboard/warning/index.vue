@@ -12,10 +12,17 @@
         <el-table-column prop="totalQuantity" label="总馆藏" min-width="80" />
         <el-table-column prop="availableQuantity" label="可借数量" min-width="80" />
         <el-table-column prop="borrowedQuantity" label="已借数量" min-width="80" />
-        <el-table-column prop="status" label="状态" min-width="80">
+        <el-table-column prop="status" label="状态" min-width="120">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === '0'" type="success">上架</el-tag>
             <el-tag v-else type="danger">下架</el-tag>
+            <el-switch
+              v-model="scope.row.status"
+              active-value="0"
+              inactive-value="1"
+              @change="handleStatusChange(scope.row)"
+              style="margin-left: 10px;"
+            />
           </template>
         </el-table-column>
       </el-table>
@@ -28,6 +35,7 @@
 
 <script>
 import { getStockWarning } from "@/api/library/dashboard"
+import { updateBook } from "@/api/library/book"
 
 export default {
   name: "DashboardWarning",
@@ -44,6 +52,17 @@ export default {
     getStockWarning() {
       getStockWarning().then(response => {
         this.warningList = response.data
+      })
+    },
+    // 处理状态切换
+    handleStatusChange(row) {
+      const statusText = row.status === '0' ? '上架' : '下架'
+      updateBook(row).then(() => {
+        this.$message.success(`图书 ${row.bookName} 已${statusText}`)
+      }).catch(() => {
+        this.$message.error('状态切换失败，请重试')
+        // 恢复原状态
+        row.status = row.status === '0' ? '1' : '0'
       })
     }
   }
