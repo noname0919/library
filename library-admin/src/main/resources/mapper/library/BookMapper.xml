@@ -166,4 +166,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         group by b.category_id, d.dict_label
         order by value desc
     </select>
+
+    <select id="selectStockWarning" resultMap="BookResult">
+        select
+            *
+        from book
+        where available_quantity &lt; 5
+        order by available_quantity asc
+    </select>
 </mapper>

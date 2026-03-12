@@ -123,4 +123,11 @@ public interface BookMapper
      * @return 分类统计数据
      */
     List<Map<String, Object>> selectCategoryStats();
+
+    /**
+     * 查询库存不足的图书
+     *
+     * @return 库存不足的图书列表
+     */
+    List<Book> selectStockWarning();
 }

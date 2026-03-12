@@ -48,4 +48,11 @@ public interface IDashboardService {
      * @return TOP10活跃读者
      */
     java.util.List<java.util.Map<String, Object>> getTopActiveReaders(int days);
+
+    /**
+     * 获取库存不足预警
+     *
+     * @return 库存不足的图书列表
+     */
+    java.util.List<com.library.domain.Book> getStockWarning();
 }

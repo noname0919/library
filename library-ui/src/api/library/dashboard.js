@@ -43,3 +43,11 @@ export function getTopActiveReaders(days) {
     params: { days }
   })
 }
+
+// 获取库存不足预警
+export function getStockWarning() {
+  return request({
+    url: '/library/dashboard/stock-warning',
+    method: 'get'
+  })
+}

@@ -73,4 +73,14 @@ public class DashboardController extends BaseController {
         java.util.List<java.util.Map<String, Object>> readers = dashboardService.getTopActiveReaders(days);
         return AjaxResult.success(readers);
     }
+
+    /**
+     * 获取库存不足预警
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:trend:view')")
+    @GetMapping("/stock-warning")
+    public AjaxResult getStockWarning() {
+        java.util.List<com.library.domain.Book> books = dashboardService.getStockWarning();
+        return AjaxResult.success(books);
+    }
 }

@@ -118,4 +118,11 @@ public class DashboardServiceImpl implements IDashboardService {
         log.info("获取TOP10活跃读者：天数={}, 数据条数={}", days, readers.size());
         return readers;
     }
+
+    @Override
+    public List<com.library.domain.Book> getStockWarning() {
+        List<com.library.domain.Book> books = bookMapper.selectStockWarning();
+        log.info("获取库存不足预警：数据条数={}", books.size());
+        return books;
+    }
 }

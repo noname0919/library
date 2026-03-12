@@ -35,7 +35,7 @@
     <!-- 读者借阅排行榜 -->
     <el-card class="chart-card">
       <div slot="header" class="flex items-center justify-between">
-        <span>TOP10 活跃读者</span>
+        <span>TOP10 活跃读者（借书次数最多）</span>
         <el-radio-group v-model="activeReadersDays" size="small" @change="getTopActiveReaders">
           <el-radio-button label="0">全部</el-radio-button>
           <el-radio-button label="7">7天</el-radio-button>
