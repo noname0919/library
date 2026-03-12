@@ -31,11 +31,25 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- 读者借阅排行榜 -->
+    <el-card class="chart-card">
+      <div slot="header" class="flex items-center justify-between">
+        <span>TOP10 活跃读者</span>
+        <el-radio-group v-model="activeReadersDays" size="small" @change="getTopActiveReaders">
+          <el-radio-button label="0">全部</el-radio-button>
+          <el-radio-button label="7">7天</el-radio-button>
+          <el-radio-button label="30">30天</el-radio-button>
+          <el-radio-button label="90">90天</el-radio-button>
+        </el-radio-group>
+      </div>
+      <div ref="activeReadersChart" class="chart-container"></div>
+    </el-card>
   </div>
 </template>
 
 <script>
-import { getCategoryBorrowStats, getTopBorrowedBooks } from "@/api/library/dashboard"
+import { getCategoryBorrowStats, getTopBorrowedBooks, getTopActiveReaders } from "@/api/library/dashboard"
 import * as echarts from 'echarts'
 
 export default {
@@ -47,16 +61,21 @@ export default {
       categoryDays: 0,
       topBooksChart: null,
       topBooksData: [],
-      topBooksDays: 0
+      topBooksDays: 0,
+      activeReadersChart: null,
+      activeReadersData: [],
+      activeReadersDays: 0
     }
   },
   created() {
     this.getCategoryBorrowStats()
     this.getTopBorrowedBooks()
+    this.getTopActiveReaders()
   },
   mounted() {
     this.initCategoryChart()
     this.initTopBooksChart()
+    this.initActiveReadersChart()
     window.addEventListener('resize', this.handleResize)
   },
   beforeDestroy() {
@@ -66,6 +85,9 @@ export default {
     }
     if (this.topBooksChart) {
       this.topBooksChart.dispose()
+    }
+    if (this.activeReadersChart) {
+      this.activeReadersChart.dispose()
     }
   },
   methods: {
@@ -187,12 +209,74 @@ export default {
 
       this.topBooksChart.setOption(option)
     },
+    // 获取TOP10活跃读者
+    getTopActiveReaders() {
+      getTopActiveReaders(this.activeReadersDays).then(response => {
+        this.activeReadersData = response.data
+        this.updateActiveReadersChart()
+      })
+    },
+    // 初始化活跃读者图表
+    initActiveReadersChart() {
+      this.activeReadersChart = echarts.init(this.$refs.activeReadersChart)
+      this.updateActiveReadersChart()
+    },
+    // 更新活跃读者图表
+    updateActiveReadersChart() {
+      if (!this.activeReadersChart || !this.activeReadersData || this.activeReadersData.length === 0) return
+
+      const readers = this.activeReadersData.map(item => item.readerName)
+      const counts = this.activeReadersData.map(item => item.borrowCount)
+
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          formatter: '{b}: {c}次'
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          data: readers,
+          axisLabel: {
+            fontSize: 11,
+            rotate: 30
+          }
+        },
+        yAxis: {
+          type: 'value',
+          minInterval: 1
+        },
+        series: [
+          {
+            name: '借阅次数',
+            type: 'bar',
+            data: counts,
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#409EFF' },
+                { offset: 1, color: '#79BBFF' }
+              ])
+            }
+          }
+        ]
+      }
+
+      this.activeReadersChart.setOption(option)
+    },
     handleResize() {
       if (this.categoryChart) {
         this.categoryChart.resize()
       }
       if (this.topBooksChart) {
         this.topBooksChart.resize()
+      }
+      if (this.activeReadersChart) {
+        this.activeReadersChart.resize()
       }
     }
   }

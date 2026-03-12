@@ -34,3 +34,12 @@ export function getTopBorrowedBooks(days) {
     params: { days }
   })
 }
+
+// 获取TOP10活跃读者
+export function getTopActiveReaders(days) {
+  return request({
+    url: '/library/dashboard/top-active-readers',
+    method: 'get',
+    params: { days }
+  })
+}

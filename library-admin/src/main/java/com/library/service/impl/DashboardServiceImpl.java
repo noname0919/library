@@ -111,4 +111,11 @@ public class DashboardServiceImpl implements IDashboardService {
         log.info("获取TOP10热门图书：天数={}, 数据条数={}", days, books.size());
         return books;
     }
+
+    @Override
+    public List<Map<String, Object>> getTopActiveReaders(int days) {
+        List<Map<String, Object>> readers = borrowRecordMapper.selectTopActiveReaders(10, days);
+        log.info("获取TOP10活跃读者：天数={}, 数据条数={}", days, readers.size());
+        return readers;
+    }
 }

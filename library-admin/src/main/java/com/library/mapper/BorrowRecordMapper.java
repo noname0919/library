@@ -173,4 +173,13 @@ public interface BorrowRecordMapper {
      * @return 热门图书列表
      */
     List<java.util.Map<String, Object>> selectTopBorrowedBooks(@Param("limit") int limit, @Param("days") int days);
+
+    /**
+     * 查询TOP N活跃读者（借阅次数最多）
+     * 
+     * @param limit 限制数量
+     * @param days 天数
+     * @return 活跃读者列表
+     */
+    List<java.util.Map<String, Object>> selectTopActiveReaders(@Param("limit") int limit, @Param("days") int days);
 }

@@ -63,4 +63,14 @@ public class DashboardController extends BaseController {
         java.util.List<java.util.Map<String, Object>> books = dashboardService.getTopBorrowedBooks(days);
         return AjaxResult.success(books);
     }
+
+    /**
+     * 获取TOP10活跃读者
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:trend:view')")
+    @GetMapping("/top-active-readers")
+    public AjaxResult getTopActiveReaders(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int days) {
+        java.util.List<java.util.Map<String, Object>> readers = dashboardService.getTopActiveReaders(days);
+        return AjaxResult.success(readers);
+    }
 }

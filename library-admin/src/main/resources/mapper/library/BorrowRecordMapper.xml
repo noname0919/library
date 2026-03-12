@@ -219,4 +219,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by borrowCount desc
         limit #{limit}
     </select>
+
+    <select id="selectTopActiveReaders" resultType="java.util.Map">
+        select
+            COALESCE(u.nick_name, u.user_name) as readerName,
+            count(br.id) as borrowCount
+        from borrow_record br
+        left join sys_user u on br.user_id = u.user_id
+        <if test="days > 0">
+            where br.borrow_time >= date_sub(now(), interval #{days} day)
+        </if>
+        group by br.user_id, u.nick_name, u.user_name
+        order by borrowCount desc
+        limit #{limit}
+    </select>
 </mapper>

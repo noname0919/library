@@ -40,4 +40,12 @@ public interface IDashboardService {
      * @return TOP10热门图书
      */
     java.util.List<java.util.Map<String, Object>> getTopBorrowedBooks(int days);
+
+    /**
+     * 获取TOP10活跃读者
+     *
+     * @param days 天数
+     * @return TOP10活跃读者
+     */
+    java.util.List<java.util.Map<String, Object>> getTopActiveReaders(int days);
 }
