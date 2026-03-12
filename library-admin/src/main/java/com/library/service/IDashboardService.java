@@ -24,4 +24,20 @@ public interface IDashboardService {
      * @return 借阅趋势数据
      */
     java.util.List<java.util.Map<String, Object>> getBorrowTrend(int days);
+
+    /**
+     * 获取图书分类借阅统计
+     *
+     * @param days 天数
+     * @return 分类借阅统计数据
+     */
+    java.util.List<java.util.Map<String, Object>> getCategoryBorrowStats(int days);
+
+    /**
+     * 获取TOP10热门图书
+     *
+     * @param days 天数
+     * @return TOP10热门图书
+     */
+    java.util.List<java.util.Map<String, Object>> getTopBorrowedBooks(int days);
 }

@@ -191,4 +191,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         group by date_format(borrow_time, '%Y-%m-%d')
         order by date
     </select>
+
+    <select id="selectCategoryBorrowStats" parameterType="java.lang.Integer" resultType="java.util.Map">
+        select
+            dd.dict_label as categoryName,
+            count(br.id) as borrowCount
+        from borrow_record br
+        left join book b on br.book_id = b.id
+        left join sys_dict_data dd on b.category_id = dd.dict_value and dd.dict_type = 'book_category'
+        <if test="days > 0">
+            where br.borrow_time >= date_sub(now(), interval #{days} day)
+        </if>
+        group by dd.dict_value, dd.dict_label
+        order by borrowCount desc
+    </select>
+
+    <select id="selectTopBorrowedBooks" resultType="java.util.Map">
+        select
+            b.book_name as bookName,
+            count(br.id) as borrowCount
+        from borrow_record br
+        left join book b on br.book_id = b.id
+        <if test="days > 0">
+            where br.borrow_time >= date_sub(now(), interval #{days} day)
+        </if>
+        group by b.id, b.book_name
+        order by borrowCount desc
+        limit #{limit}
+    </select>
 </mapper>

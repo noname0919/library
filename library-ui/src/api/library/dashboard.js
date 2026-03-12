@@ -16,3 +16,21 @@ export function getBorrowTrend(days) {
     params: { days }
   })
 }
+
+// 获取图书分类借阅统计
+export function getCategoryBorrowStats(days) {
+  return request({
+    url: '/library/dashboard/category-borrow-stats',
+    method: 'get',
+    params: { days }
+  })
+}
+
+// 获取TOP10热门图书
+export function getTopBorrowedBooks(days) {
+  return request({
+    url: '/library/dashboard/top-borrowed-books',
+    method: 'get',
+    params: { days }
+  })
+}

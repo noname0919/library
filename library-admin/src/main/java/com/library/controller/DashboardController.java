@@ -43,4 +43,24 @@ public class DashboardController extends BaseController {
         java.util.List<java.util.Map<String, Object>> trend = dashboardService.getBorrowTrend(days);
         return AjaxResult.success(trend);
     }
+
+    /**
+     * 获取图书分类借阅统计
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:trend:view')")
+    @GetMapping("/category-borrow-stats")
+    public AjaxResult getCategoryBorrowStats(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "7") int days) {
+        java.util.List<java.util.Map<String, Object>> stats = dashboardService.getCategoryBorrowStats(days);
+        return AjaxResult.success(stats);
+    }
+
+    /**
+     * 获取TOP10热门图书
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:trend:view')")
+    @GetMapping("/top-borrowed-books")
+    public AjaxResult getTopBorrowedBooks(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "7") int days) {
+        java.util.List<java.util.Map<String, Object>> books = dashboardService.getTopBorrowedBooks(days);
+        return AjaxResult.success(books);
+    }
 }

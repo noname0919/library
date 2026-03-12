@@ -156,4 +156,21 @@ public interface BorrowRecordMapper {
      * @return 借阅趋势数据
      */
     List<java.util.Map<String, Object>> selectBorrowTrend(@Param("days") int days);
+
+    /**
+     * 查询图书分类借阅统计
+     * 
+     * @param days 天数
+     * @return 分类借阅统计数据
+     */
+    List<java.util.Map<String, Object>> selectCategoryBorrowStats(@Param("days") int days);
+
+    /**
+     * 查询TOP N热门图书
+     * 
+     * @param limit 限制数量
+     * @param days 天数
+     * @return 热门图书列表
+     */
+    List<java.util.Map<String, Object>> selectTopBorrowedBooks(@Param("limit") int limit, @Param("days") int days);
 }

@@ -97,4 +97,18 @@ public class DashboardServiceImpl implements IDashboardService {
         log.info("获取借阅趋势数据：天数={}, 数据条数={}", days, result.size());
         return result;
     }
+
+    @Override
+    public List<Map<String, Object>> getCategoryBorrowStats(int days) {
+        List<Map<String, Object>> stats = borrowRecordMapper.selectCategoryBorrowStats(days);
+        log.info("获取图书分类借阅统计：天数={}, 数据条数={}", days, stats.size());
+        return stats;
+    }
+
+    @Override
+    public List<Map<String, Object>> getTopBorrowedBooks(int days) {
+        List<Map<String, Object>> books = borrowRecordMapper.selectTopBorrowedBooks(10, days);
+        log.info("获取TOP10热门图书：天数={}, 数据条数={}", days, books.size());
+        return books;
+    }
 }
