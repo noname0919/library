@@ -181,4 +181,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where status = '0'
           and due_date &lt; now()
     </select>
+
+    <select id="selectBorrowTrend" parameterType="java.lang.Integer" resultType="java.util.Map">
+        select
+            date_format(borrow_time, '%Y-%m-%d') as date,
+            count(1) as count
+        from borrow_record
+        where borrow_time >= date_sub(now(), interval #{days} day)
+        group by date_format(borrow_time, '%Y-%m-%d')
+        order by date
+    </select>
 </mapper>

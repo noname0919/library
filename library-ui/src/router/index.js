@@ -93,6 +93,37 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
+    path: '/dashboard',
+    component: Layout,
+    redirect: '/dashboard/index',
+    name: 'Dashboard',
+    meta: {
+      title: '仪表盘',
+      icon: 'dashboard'
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/dashboard/index'),
+        name: 'DashboardIndex',
+        meta: {
+          title: '数据概览',
+          icon: 'dashboard'
+        }
+      },
+      {
+        path: 'trend',
+        component: () => import('@/views/dashboard/trend/index'),
+        name: 'DashboardTrend',
+        meta: {
+          title: '借阅趋势',
+          icon: 'trend',
+          permissions: ['library:dashboard:trend:view']
+        }
+      }
+    ]
+  },
+  {
     path: '/record',
     component: Layout,
     redirect: '/record/borrow',

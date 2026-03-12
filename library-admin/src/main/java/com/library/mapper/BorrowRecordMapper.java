@@ -148,4 +148,12 @@ public interface BorrowRecordMapper {
      * @return 逾期数量
      */
     int countOverdue();
+
+    /**
+     * 查询借阅趋势数据
+     * 
+     * @param days 天数
+     * @return 借阅趋势数据
+     */
+    List<java.util.Map<String, Object>> selectBorrowTrend(@Param("days") int days);
 }

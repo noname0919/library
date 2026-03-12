@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,5 +63,38 @@ public class DashboardServiceImpl implements IDashboardService {
                 totalBooks, totalUsers, todayBorrow, todayReturn, overdueCount);
 
         return statistics;
+    }
+
+    @Override
+    public List<Map<String, Object>> getBorrowTrend(int days) {
+        // 获取数据库中的借阅数据
+        List<Map<String, Object>> trend = borrowRecordMapper.selectBorrowTrend(days);
+        
+        // 将查询结果转换为Map，方便查找
+        Map<String, Integer> dateCountMap = new HashMap<>();
+        for (Map<String, Object> item : trend) {
+            String date = (String) item.get("date");
+            Integer count = ((Number) item.get("count")).intValue();
+            dateCountMap.put(date, count);
+        }
+        
+        // 生成完整的日期列表（包括没有借阅记录的日期）
+        List<Map<String, Object>> result = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        
+        // 从今天往前推days天
+        for (int i = days - 1; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            String dateStr = date.format(formatter);
+            
+            Map<String, Object> item = new HashMap<>();
+            item.put("date", dateStr);
+            item.put("count", dateCountMap.getOrDefault(dateStr, 0));
+            result.add(item);
+        }
+        
+        log.info("获取借阅趋势数据：天数={}, 数据条数={}", days, result.size());
+        return result;
     }
 }

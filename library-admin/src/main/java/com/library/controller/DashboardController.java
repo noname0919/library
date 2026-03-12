@@ -33,4 +33,14 @@ public class DashboardController extends BaseController {
         Map<String, Object> statistics = dashboardService.getStatistics();
         return AjaxResult.success(statistics);
     }
+
+    /**
+     * 获取借阅趋势数据
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:trend:view')")
+    @GetMapping("/borrow-trend")
+    public AjaxResult getBorrowTrend(@org.springframework.web.bind.annotation.RequestParam(defaultValue = "7") int days) {
+        java.util.List<java.util.Map<String, Object>> trend = dashboardService.getBorrowTrend(days);
+        return AjaxResult.success(trend);
+    }
 }

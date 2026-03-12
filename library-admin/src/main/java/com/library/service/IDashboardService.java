@@ -16,4 +16,12 @@ public interface IDashboardService {
      * @return 统计数据
      */
     Map<String, Object> getStatistics();
+
+    /**
+     * 获取借阅趋势数据
+     *
+     * @param days 天数
+     * @return 借阅趋势数据
+     */
+    java.util.List<java.util.Map<String, Object>> getBorrowTrend(int days);
 }

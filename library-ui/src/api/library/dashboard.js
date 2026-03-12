@@ -7,3 +7,12 @@ export function getDashboardStatistics() {
     method: 'get'
   })
 }
+
+// 获取借阅趋势数据
+export function getBorrowTrend(days) {
+  return request({
+    url: '/library/dashboard/borrow-trend',
+    method: 'get',
+    params: { days }
+  })
+}
