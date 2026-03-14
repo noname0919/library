@@ -3,12 +3,12 @@ package com.library.domain;
 import com.library.common.annotation.Excel;
 
 /**
- * 借阅记录导出DTO
+ * 归还记录导出DTO
  *
  * @author xiangziyang
- * @date 2026-03-14
+ * @date 2026-03-15
  */
-public class BorrowRecordExportDTO {
+public class BorrowRecordReturnExportDTO {
     @Excel(name = "图书名称")
     private String bookName;
     
@@ -26,6 +26,9 @@ public class BorrowRecordExportDTO {
     
     @Excel(name = "应还日期")
     private String dueDate;
+    
+    @Excel(name = "归还时间")
+    private String returnTime;
 
     public String getBookName() {
         return bookName;
@@ -73,5 +76,13 @@ public class BorrowRecordExportDTO {
 
     public void setDueDate(String dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public String getReturnTime() {
+        return returnTime;
+    }
+
+    public void setReturnTime(String returnTime) {
+        this.returnTime = returnTime;
     }
 }

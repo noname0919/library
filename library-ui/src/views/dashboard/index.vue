@@ -74,6 +74,10 @@
 
     <!-- 今日借阅记录弹窗 -->
     <el-dialog title="今日借阅记录" :visible.sync="todayBorrowDialogVisible" width="900px">
+      <div slot="title" class="flex items-center justify-between">
+        <span>今日借阅记录</span>
+        <el-button type="primary" size="small" icon="el-icon-download" @click="handleExport('todayBorrow')">导出</el-button>
+      </div>
       <el-table :data="todayBorrowRecords" v-loading="dialogLoading">
         <el-table-column label="图书名称" prop="bookName" />
         <el-table-column label="ISBN" prop="isbn" />
@@ -92,16 +96,15 @@
             <el-tag v-else-if="scope.row.status === '2'" type="danger">已逾期</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80">
-          <template slot-scope="scope">
-            <el-button type="primary" size="mini" icon="el-icon-download" @click="handleExport('todayBorrow')">导出</el-button>
-          </template>
-        </el-table-column>
       </el-table>
     </el-dialog>
 
     <!-- 今日归还记录弹窗 -->
     <el-dialog title="今日归还记录" :visible.sync="todayReturnDialogVisible" width="900px">
+      <div slot="title" class="flex items-center justify-between">
+        <span>今日归还记录</span>
+        <el-button type="primary" size="small" icon="el-icon-download" @click="handleExport('todayReturn')">导出</el-button>
+      </div>
       <el-table :data="todayReturnRecords" v-loading="dialogLoading">
         <el-table-column label="图书名称" prop="bookName" />
         <el-table-column label="ISBN" prop="isbn" />
@@ -109,16 +112,15 @@
         <el-table-column label="读者姓名" prop="nickName" />
         <el-table-column label="借阅时间" prop="borrowTime" width="160" />
         <el-table-column label="归还时间" prop="returnTime" width="160" />
-        <el-table-column label="操作" width="80">
-          <template slot-scope="scope">
-            <el-button type="primary" size="mini" icon="el-icon-download" @click="handleExport('todayReturn')">导出</el-button>
-          </template>
-        </el-table-column>
       </el-table>
     </el-dialog>
 
     <!-- 逾期未还记录弹窗 -->
     <el-dialog title="逾期未还记录" :visible.sync="overdueDialogVisible" width="900px">
+      <div slot="title" class="flex items-center justify-between">
+        <span>逾期未还记录</span>
+        <el-button type="primary" size="small" icon="el-icon-download" @click="handleExport('overdue')">导出</el-button>
+      </div>
       <el-table :data="overdueRecords" v-loading="dialogLoading">
         <el-table-column label="图书名称" prop="bookName" />
         <el-table-column label="ISBN" prop="isbn" />
@@ -133,11 +135,6 @@
         <el-table-column label="状态" width="80">
           <template slot-scope="scope">
             <el-tag type="danger">已逾期</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="80">
-          <template slot-scope="scope">
-            <el-button type="primary" size="mini" icon="el-icon-download" @click="handleExport('overdue')">导出</el-button>
           </template>
         </el-table-column>
       </el-table>

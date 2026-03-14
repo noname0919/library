@@ -117,9 +117,9 @@ public class DashboardController extends BaseController {
     public void exportTodayReturn(HttpServletResponse response) {
         java.util.List<com.library.domain.BorrowRecord> records = dashboardService.getTodayReturnRecords();
         // 转换为导出DTO，包含归还时间字段
-        java.util.List<com.library.domain.BorrowRecordExportDTO> exportData = new java.util.ArrayList<>();
+        java.util.List<com.library.domain.BorrowRecordReturnExportDTO> exportData = new java.util.ArrayList<>();
         for (com.library.domain.BorrowRecord record : records) {
-            com.library.domain.BorrowRecordExportDTO dto = new com.library.domain.BorrowRecordExportDTO();
+            com.library.domain.BorrowRecordReturnExportDTO dto = new com.library.domain.BorrowRecordReturnExportDTO();
             dto.setBookName(record.getBookName());
             dto.setIsbn(record.getIsbn());
             dto.setUserName(record.getUserName());
@@ -131,7 +131,7 @@ public class DashboardController extends BaseController {
             }
             exportData.add(dto);
         }
-        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecordExportDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.BorrowRecordExportDTO.class);
+        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecordReturnExportDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.BorrowRecordReturnExportDTO.class);
         util.exportExcel(response, exportData, "今日归还记录");
     }
 
@@ -142,8 +142,20 @@ public class DashboardController extends BaseController {
     @PostMapping("/export-overdue")
     public void exportOverdue(HttpServletResponse response) {
         java.util.List<com.library.domain.BorrowRecord> records = dashboardService.getOverdueRecords();
-        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecord> util = new com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecord>(com.library.domain.BorrowRecord.class);
-        util.exportExcel(response, records, "逾期未还记录");
+        // 转换为导出DTO，不包含归还时间字段
+        java.util.List<com.library.domain.BorrowRecordExportDTO> exportData = new java.util.ArrayList<>();
+        for (com.library.domain.BorrowRecord record : records) {
+            com.library.domain.BorrowRecordExportDTO dto = new com.library.domain.BorrowRecordExportDTO();
+            dto.setBookName(record.getBookName());
+            dto.setIsbn(record.getIsbn());
+            dto.setUserName(record.getUserName());
+            dto.setNickName(record.getNickName());
+            dto.setBorrowTime(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getBorrowTime()));
+            dto.setDueDate(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getDueDate()));
+            exportData.add(dto);
+        }
+        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecordExportDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.BorrowRecordExportDTO.class);
+        util.exportExcel(response, exportData, "逾期未还记录");
     }
 
     /**
