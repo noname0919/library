@@ -149,3 +149,8 @@ xss:
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
 
+# AI配置
+ai:
+  apiKey: f7e11734b62e4aeab211aca50de5a2e5.gZxSz08hV8fkI64m  # 智谱AI的API Key
+  model: glm-4-flash         # 模型名称，默认使用免费的GLM-4-Flash
+  apiUrl: https://open.bigmodel.cn/api/paas/v4/chat/completions

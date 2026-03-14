@@ -105,6 +105,9 @@ export function filterDynamicRoutes(routes) {
       if (auth.hasRoleOr(route.roles)) {
         res.push(route)
       }
+    } else {
+      // 如果路由没有权限或角色限制，默认添加
+      res.push(route)
     }
   })
   return res

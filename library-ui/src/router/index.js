@@ -84,7 +84,10 @@ export const constantRoutes = [
         path: 'profile',
         component: () => import('@/views/system/user/profile/index'),
         name: 'Profile',
-        meta: { title: '个人中心', icon: 'user' }
+        meta: {
+          title: '个人中心',
+          icon: 'user'
+        }
       }
     ]
   }
@@ -175,13 +178,34 @@ export const dynamicRoutes = [
     ]
   },
   {
+    path: '/answer',
+    component: Layout,
+    redirect: '/answer/index',
+    name: 'AI',
+    meta: {
+      title: '智能问答',
+      icon: '智能问答'
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/ai/index'),
+        name: 'SmartQnA',
+        meta: {
+          title: '智能问答',
+          icon: '智能问答'
+        }
+      }
+    ]
+  },
+  {
     path: '/system/user-auth',
     component: Layout,
     hidden: true,
     permissions: ['system:user:edit'],
     children: [
       {
-        path: 'role/:userId(\\d+)',
+        path: 'role/:userId(\d+)',
         component: () => import('@/views/system/user/authRole'),
         name: 'AuthRole',
         meta: { title: '分配角色', activeMenu: '/system/user' }
@@ -195,7 +219,7 @@ export const dynamicRoutes = [
     permissions: ['system:role:edit'],
     children: [
       {
-        path: 'user/:roleId(\\d+)',
+        path: 'user/:roleId(\d+)',
         component: () => import('@/views/system/role/authUser'),
         name: 'AuthUser',
         meta: { title: '分配用户', activeMenu: '/system/role' }
@@ -209,7 +233,7 @@ export const dynamicRoutes = [
     permissions: ['system:dict:list'],
     children: [
       {
-        path: 'index/:dictId(\\d+)',
+        path: 'index/:dictId(\d+)',
         component: () => import('@/views/system/dict/data'),
         name: 'Data',
         meta: { title: '字典数据', activeMenu: '/system/dict' }
@@ -223,7 +247,7 @@ export const dynamicRoutes = [
     permissions: ['monitor:job:list'],
     children: [
       {
-        path: 'index/:jobId(\\d+)',
+        path: 'index/:jobId(\d+)',
         component: () => import('@/views/monitor/job/log'),
         name: 'JobLog',
         meta: { title: '调度日志', activeMenu: '/monitor/job' }
@@ -237,7 +261,7 @@ export const dynamicRoutes = [
     permissions: ['tool:gen:edit'],
     children: [
       {
-        path: 'index/:tableId(\\d+)',
+        path: 'index/:tableId(\d+)',
         component: () => import('@/views/tool/gen/editTable'),
         name: 'GenEdit',
         meta: { title: '修改生成配置', activeMenu: '/tool/gen' }
