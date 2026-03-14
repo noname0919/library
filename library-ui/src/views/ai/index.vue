@@ -43,8 +43,8 @@
           v-model="inputMessage"
           type="textarea"
           :rows="3"
-          placeholder="请输入您的问题..."
-          @keyup.enter.exact="sendMessage"
+          placeholder="请输入您的问题，按回车发送..."
+          @keydown.enter.native.prevent="handleEnter"
         ></el-input>
         <div class="input-actions">
           <el-button type="primary" @click="sendMessage" :loading="isLoading" style="width: 100px; height: 40px; font-size: 14px;">
@@ -78,6 +78,15 @@ export default {
     }
   },
   methods: {
+    handleEnter(event) {
+      // 如果按下了Shift+Enter，则插入换行
+      if (event.shiftKey) {
+        return
+      }
+      // 否则发送消息
+      event.preventDefault()
+      this.sendMessage()
+    },
     async sendMessage() {
       if (!this.inputMessage.trim() || this.isLoading) return
       
