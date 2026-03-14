@@ -170,9 +170,10 @@ public class DashboardController extends BaseController {
         for (java.util.Map<String, Object> stat : stats) {
             com.library.domain.CategoryStatsDTO dto = new com.library.domain.CategoryStatsDTO();
             dto.setName((String) stat.get("name"));
-            dto.setValue((Integer) stat.get("value"));
+            dto.setValue(stat.get("value").toString());
             exportData.add(dto);
         }
+        // 直接使用ExcelUtil导出，让它自己处理响应头
         com.library.common.utils.poi.ExcelUtil<com.library.domain.CategoryStatsDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.CategoryStatsDTO.class);
         util.exportExcel(response, exportData, "图书分类占比");
     }
