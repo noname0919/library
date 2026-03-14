@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +54,20 @@ public class AIServiceImpl implements IAIService {
             // 构建请求体
             JSONObject requestBody = new JSONObject();
             requestBody.put("model", model);
-            requestBody.put("messages", messages);
+            
+            // 构建完整的消息列表，添加系统规则作为系统提示
+            List<Map<String, String>> completeMessages = new ArrayList<>();
+            
+            // 添加系统规则提示
+            Map<String, String> systemMessage = new HashMap<>();
+            systemMessage.put("role", "system");
+            systemMessage.put("content", getSystemPrompt());
+            completeMessages.add(systemMessage);
+            
+            // 添加用户和助手的对话历史
+            completeMessages.addAll(messages);
+            
+            requestBody.put("messages", completeMessages);
             requestBody.put("temperature", 0.7);
             requestBody.put("max_tokens", 2048);
 
@@ -103,10 +118,10 @@ public class AIServiceImpl implements IAIService {
         }
 
         try {
-            Map<String, String> testMessage = new java.util.HashMap<>();
+            Map<String, String> testMessage = new HashMap<>();
             testMessage.put("role", "user");
             testMessage.put("content", "Hello");
-            List<Map<String, String>> testMessages = new java.util.ArrayList<>();
+            List<Map<String, String>> testMessages = new ArrayList<>();
             testMessages.add(testMessage);
             chat(testMessages);
             return true;
@@ -114,5 +129,32 @@ public class AIServiceImpl implements IAIService {
             log.error("AI服务连接测试失败", e);
             return false;
         }
+    }
+
+    /**
+     * 获取系统提示，包含图书管理系统的规则
+     */
+    private String getSystemPrompt() {
+        return "你是图书管理系统的智能助手，需要遵循以下规则：\n" +
+                "1. 借阅规则：\n" +
+                "   - 借阅期限为30天\n" +
+                "   - 每个用户最多可同时借阅5本书\n" +
+                "   - 用户不能有逾期未还的图书才能借书\n" +
+                "   - 图书必须处于上架状态且有可借数量\n" +
+                "2. 续借规则：\n" +
+                "   - 每本书最多续借3次\n" +
+                "   - 只能在图书未逾期且未归还的情况下续借\n" +
+                "   - 每次续借延长30天\n" +
+                "3. 归还规则：\n" +
+                "   - 归还时系统自动更新图书状态\n" +
+                "   - 系统会自动识别逾期图书\n" +
+                "4. 提醒规则：\n" +
+                "   - 每天上午9点执行逾期提醒\n" +
+                "   - 包括即将逾期提醒（剩余1天内到期）和已逾期提醒\n" +
+                "5. 状态规则：\n" +
+                "   - 图书状态：0表示上架，其他状态表示不可借\n" +
+                "   - 借阅记录状态：0表示借阅中，1表示已归还\n" +
+                "\n" +
+                "请基于这些规则回答用户问题，确保信息准确。如果用户的问题与系统规则相关，请严格按照规则回答。";
     }
 }
