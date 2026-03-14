@@ -6,9 +6,11 @@ import com.library.service.IDashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 /**
@@ -82,5 +84,84 @@ public class DashboardController extends BaseController {
     public AjaxResult getStockWarning() {
         java.util.List<com.library.domain.Book> books = dashboardService.getStockWarning();
         return AjaxResult.success(books);
+    }
+
+    /**
+     * 导出今日借阅记录
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:view')")
+    @PostMapping("/export-today-borrow")
+    public void exportTodayBorrow(HttpServletResponse response) {
+        java.util.List<com.library.domain.BorrowRecord> records = dashboardService.getTodayBorrowRecords();
+        // 转换为导出DTO，不包含状态字段
+        java.util.List<com.library.domain.BorrowRecordExportDTO> exportData = new java.util.ArrayList<>();
+        for (com.library.domain.BorrowRecord record : records) {
+            com.library.domain.BorrowRecordExportDTO dto = new com.library.domain.BorrowRecordExportDTO();
+            dto.setBookName(record.getBookName());
+            dto.setIsbn(record.getIsbn());
+            dto.setUserName(record.getUserName());
+            dto.setNickName(record.getNickName());
+            dto.setBorrowTime(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getBorrowTime()));
+            dto.setDueDate(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getDueDate()));
+            exportData.add(dto);
+        }
+        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecordExportDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.BorrowRecordExportDTO.class);
+        util.exportExcel(response, exportData, "今日借阅记录");
+    }
+
+    /**
+     * 导出今日归还记录
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:view')")
+    @PostMapping("/export-today-return")
+    public void exportTodayReturn(HttpServletResponse response) {
+        java.util.List<com.library.domain.BorrowRecord> records = dashboardService.getTodayReturnRecords();
+        // 转换为导出DTO，包含归还时间字段
+        java.util.List<com.library.domain.BorrowRecordExportDTO> exportData = new java.util.ArrayList<>();
+        for (com.library.domain.BorrowRecord record : records) {
+            com.library.domain.BorrowRecordExportDTO dto = new com.library.domain.BorrowRecordExportDTO();
+            dto.setBookName(record.getBookName());
+            dto.setIsbn(record.getIsbn());
+            dto.setUserName(record.getUserName());
+            dto.setNickName(record.getNickName());
+            dto.setBorrowTime(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getBorrowTime()));
+            dto.setDueDate(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getDueDate()));
+            if (record.getReturnTime() != null) {
+                dto.setReturnTime(com.library.common.utils.DateUtils.parseDateToStr("yyyy-MM-dd", record.getReturnTime()));
+            }
+            exportData.add(dto);
+        }
+        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecordExportDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.BorrowRecordExportDTO.class);
+        util.exportExcel(response, exportData, "今日归还记录");
+    }
+
+    /**
+     * 导出逾期未还记录
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:view')")
+    @PostMapping("/export-overdue")
+    public void exportOverdue(HttpServletResponse response) {
+        java.util.List<com.library.domain.BorrowRecord> records = dashboardService.getOverdueRecords();
+        com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecord> util = new com.library.common.utils.poi.ExcelUtil<com.library.domain.BorrowRecord>(com.library.domain.BorrowRecord.class);
+        util.exportExcel(response, records, "逾期未还记录");
+    }
+
+    /**
+     * 导出图书分类占比
+     */
+    @PreAuthorize("@ss.hasPermi('library:dashboard:view')")
+    @PostMapping("/export-category-stats")
+    public void exportCategoryStats(HttpServletResponse response) {
+        java.util.List<java.util.Map<String, Object>> stats = dashboardService.getCategoryStats();
+        // 转换为具体的DTO格式进行导出
+        java.util.List<com.library.domain.CategoryStatsDTO> exportData = new java.util.ArrayList<>();
+        for (java.util.Map<String, Object> stat : stats) {
+            com.library.domain.CategoryStatsDTO dto = new com.library.domain.CategoryStatsDTO();
+            dto.setName((String) stat.get("name"));
+            dto.setValue((Integer) stat.get("value"));
+            exportData.add(dto);
+        }
+        com.library.common.utils.poi.ExcelUtil<com.library.domain.CategoryStatsDTO> util = new com.library.common.utils.poi.ExcelUtil<>(com.library.domain.CategoryStatsDTO.class);
+        util.exportExcel(response, exportData, "图书分类占比");
     }
 }

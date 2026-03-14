@@ -182,4 +182,27 @@ public interface BorrowRecordMapper {
      * @return 活跃读者列表
      */
     List<java.util.Map<String, Object>> selectTopActiveReaders(@Param("limit") int limit, @Param("days") int days);
+
+    /**
+     * 查询今日借阅记录
+     * 
+     * @param today 今天日期
+     * @return 今日借阅记录
+     */
+    List<BorrowRecord> selectTodayBorrowRecords(@Param("today") String today);
+
+    /**
+     * 查询今日归还记录
+     * 
+     * @param today 今天日期
+     * @return 今日归还记录
+     */
+    List<BorrowRecord> selectTodayReturnRecords(@Param("today") String today);
+
+    /**
+     * 统计不同用户数量
+     * 
+     * @return 不同用户数量
+     */
+    Long countDistinctUsers();
 }

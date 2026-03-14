@@ -50,6 +50,11 @@ public class BorrowRecord extends BaseEntity {
     @ApiModelProperty(value = "续借次数")
     private Integer renewCount;
 
+    /** 归还时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "归还时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date returnTime;
+
     /** 借阅状态（0借阅中，1已归还，2逾期） */
     @NotBlank(message = "借阅状态不能为空")
     @Pattern(regexp = "^[012]$", message = "借阅状态只能是0、1或2")

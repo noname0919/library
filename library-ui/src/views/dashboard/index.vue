@@ -63,8 +63,9 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :lg="12">
         <el-card class="chart-card">
-          <div slot="header">
+          <div slot="header" class="flex items-center justify-between">
             <span>图书分类占比</span>
+            <el-button size="small" type="primary" icon="el-icon-download" @click="handleExport('categoryStats')">导出</el-button>
           </div>
           <div ref="categoryChart" class="chart-container"></div>
         </el-card>
@@ -91,6 +92,11 @@
             <el-tag v-else-if="scope.row.status === '2'" type="danger">已逾期</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="操作" width="80">
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" icon="el-icon-download" @click="handleExport('todayBorrow')">导出</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
 
@@ -102,7 +108,12 @@
         <el-table-column label="读者账号" prop="userName" />
         <el-table-column label="读者姓名" prop="nickName" />
         <el-table-column label="借阅时间" prop="borrowTime" width="160" />
-        <el-table-column label="归还时间" prop="updateTime" width="160" />
+        <el-table-column label="归还时间" prop="returnTime" width="160" />
+        <el-table-column label="操作" width="80">
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" icon="el-icon-download" @click="handleExport('todayReturn')">导出</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
 
@@ -119,6 +130,16 @@
             <span style="color: #f56c6c; font-weight: bold;">{{ parseTime(scope.row.dueDate, '{y}-{m}-{d}') }}</span>
           </template>
         </el-table-column>
+        <el-table-column label="状态" width="80">
+          <template slot-scope="scope">
+            <el-tag type="danger">已逾期</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="80">
+          <template slot-scope="scope">
+            <el-button type="primary" size="mini" icon="el-icon-download" @click="handleExport('overdue')">导出</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-dialog>
   </div>
@@ -126,7 +147,7 @@
 
 <script>
 import CountTo from 'vue-count-to'
-import { getDashboardStatistics } from "@/api/library/dashboard"
+import { getDashboardStatistics, exportTodayBorrow, exportTodayReturn, exportOverdue, exportCategoryStats } from "@/api/library/dashboard"
 import { listAllBorrow, listReturn, listBorrow } from "@/api/library/borrow"
 import * as echarts from 'echarts'
 
@@ -320,6 +341,49 @@ export default {
       if (this.categoryChart) {
         this.categoryChart.resize()
       }
+    },
+    // 处理导出
+    handleExport(type) {
+      let exportFunc, fileName
+      switch (type) {
+        case 'todayBorrow':
+          exportFunc = exportTodayBorrow
+          fileName = `今日借阅记录_${this.parseTime(new Date(), '{y}{m}{d}')}.xlsx`
+          break
+        case 'todayReturn':
+          exportFunc = exportTodayReturn
+          fileName = `今日归还记录_${this.parseTime(new Date(), '{y}{m}{d}')}.xlsx`
+          break
+        case 'overdue':
+          exportFunc = exportOverdue
+          fileName = `逾期未还记录_${this.parseTime(new Date(), '{y}{m}{d}')}.xlsx`
+          break
+        case 'categoryStats':
+          exportFunc = exportCategoryStats
+          fileName = `图书分类占比_${this.parseTime(new Date(), '{y}{m}{d}')}.xlsx`
+          break
+        default:
+          return
+      }
+
+      this.$modal.loading('导出中，请稍候...')
+      exportFunc().then(response => {
+        this.$modal.closeLoading()
+        this.downloadFile(response, fileName)
+      }).catch(() => {
+        this.$modal.closeLoading()
+        this.$message.error('导出失败，请重试')
+      })
+    },
+    // 下载文件
+    downloadFile(response, fileName) {
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      link.click()
+      window.URL.revokeObjectURL(url)
     }
   }
 }
@@ -420,7 +484,26 @@ export default {
         font-size: 20px;
       }
     }
+
+    .card-panel-export {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
   }
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
 }
 
 .chart-card {

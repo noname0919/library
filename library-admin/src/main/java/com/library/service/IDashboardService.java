@@ -55,4 +55,32 @@ public interface IDashboardService {
      * @return 库存不足的图书列表
      */
     java.util.List<com.library.domain.Book> getStockWarning();
+
+    /**
+     * 获取今日借阅记录
+     *
+     * @return 今日借阅记录
+     */
+    java.util.List<com.library.domain.BorrowRecord> getTodayBorrowRecords();
+
+    /**
+     * 获取今日归还记录
+     *
+     * @return 今日归还记录
+     */
+    java.util.List<com.library.domain.BorrowRecord> getTodayReturnRecords();
+
+    /**
+     * 获取逾期未还记录
+     *
+     * @return 逾期未还记录
+     */
+    java.util.List<com.library.domain.BorrowRecord> getOverdueRecords();
+
+    /**
+     * 获取图书分类占比
+     *
+     * @return 图书分类占比
+     */
+    java.util.List<java.util.Map<String, Object>> getCategoryStats();
 }

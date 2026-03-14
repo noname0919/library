@@ -263,6 +263,7 @@ public class BorrowRecordServiceImpl implements IBorrowRecordService {
 
         // 更新借阅记录状态为已归还
         borrowRecord.setStatus("1");
+        borrowRecord.setReturnTime(DateUtils.getNowDate());
         borrowRecord.setUpdateTime(DateUtils.getNowDate());
         
         borrowRecordMapper.updateBorrowRecord(borrowRecord);

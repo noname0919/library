@@ -3,7 +3,6 @@ package com.library.service.impl;
 import com.library.mapper.BookMapper;
 import com.library.mapper.BorrowRecordMapper;
 import com.library.service.IDashboardService;
-import com.library.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ public class DashboardServiceImpl implements IDashboardService {
 
     private final BookMapper bookMapper;
     private final BorrowRecordMapper borrowRecordMapper;
-    private final SysUserMapper sysUserMapper;
 
     @Override
     public Map<String, Object> getStatistics() {
@@ -39,9 +37,9 @@ public class DashboardServiceImpl implements IDashboardService {
         Long totalBooks = bookMapper.selectTotalCount();
         statistics.put("totalBooks", totalBooks);
 
-        // 用户总数
-        Long totalUsers = sysUserMapper.countTotalUsers();
-        statistics.put("totalUsers", totalUsers);
+        // 用户总数（从借阅记录中统计不同的用户ID）
+        Long totalUsers = borrowRecordMapper.countDistinctUsers();
+        statistics.put("totalUsers", totalUsers != null ? totalUsers : 0);
 
         // 今日借阅
         Integer todayBorrow = borrowRecordMapper.countTodayBorrow(today);
@@ -124,5 +122,35 @@ public class DashboardServiceImpl implements IDashboardService {
         List<com.library.domain.Book> books = bookMapper.selectStockWarning();
         log.info("获取库存不足预警：数据条数={}", books.size());
         return books;
+    }
+
+    @Override
+    public List<com.library.domain.BorrowRecord> getTodayBorrowRecords() {
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        List<com.library.domain.BorrowRecord> records = borrowRecordMapper.selectTodayBorrowRecords(today);
+        log.info("获取今日借阅记录：数据条数={}", records.size());
+        return records;
+    }
+
+    @Override
+    public List<com.library.domain.BorrowRecord> getTodayReturnRecords() {
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        List<com.library.domain.BorrowRecord> records = borrowRecordMapper.selectTodayReturnRecords(today);
+        log.info("获取今日归还记录：数据条数={}", records.size());
+        return records;
+    }
+
+    @Override
+    public List<com.library.domain.BorrowRecord> getOverdueRecords() {
+        List<com.library.domain.BorrowRecord> records = borrowRecordMapper.selectOverdueRecords();
+        log.info("获取逾期未还记录：数据条数={}", records.size());
+        return records;
+    }
+
+    @Override
+    public List<Map<String, Object>> getCategoryStats() {
+        List<Map<String, Object>> stats = bookMapper.selectCategoryStats();
+        log.info("获取图书分类占比：数据条数={}", stats.size());
+        return stats;
     }
 }

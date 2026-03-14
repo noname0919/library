@@ -51,3 +51,39 @@ export function getStockWarning() {
     method: 'get'
   })
 }
+
+// 导出今日借阅记录
+export function exportTodayBorrow() {
+  return request({
+    url: '/library/dashboard/export-today-borrow',
+    method: 'post',
+    responseType: 'blob'
+  })
+}
+
+// 导出今日归还记录
+export function exportTodayReturn() {
+  return request({
+    url: '/library/dashboard/export-today-return',
+    method: 'post',
+    responseType: 'blob'
+  })
+}
+
+// 导出逾期未还记录
+export function exportOverdue() {
+  return request({
+    url: '/library/dashboard/export-overdue',
+    method: 'post',
+    responseType: 'blob'
+  })
+}
+
+// 导出图书分类占比
+export function exportCategoryStats() {
+  return request({
+    url: '/library/dashboard/export-category-stats',
+    method: 'post',
+    responseType: 'blob'
+  })
+}

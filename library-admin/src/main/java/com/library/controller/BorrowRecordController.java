@@ -39,7 +39,6 @@ public class BorrowRecordController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(BorrowRecord borrowRecord)
     {
-        startPage();
         List<BorrowRecord> list = borrowRecordService.selectBorrowRecordList(borrowRecord);
         return getDataTable(list);
     }
@@ -51,7 +50,6 @@ public class BorrowRecordController extends BaseController {
     @GetMapping("/borrowing")
     public TableDataInfo borrowingList(BorrowRecord borrowRecord)
     {
-        startPage();
         List<BorrowRecord> list = borrowRecordService.selectBorrowingList(borrowRecord);
         return getDataTable(list);
     }
@@ -64,7 +62,6 @@ public class BorrowRecordController extends BaseController {
     public TableDataInfo returnedList(BorrowRecord borrowRecord)
     {
         borrowRecord.setStatus("1");
-        startPage();
         List<BorrowRecord> list = borrowRecordService.selectBorrowRecordList(borrowRecord);
         return getDataTable(list);
     }
