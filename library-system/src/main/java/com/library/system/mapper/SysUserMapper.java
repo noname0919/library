@@ -2,6 +2,8 @@ package com.library.system.mapper;
 
 import java.util.Date;
 import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.library.common.core.domain.entity.SysUser;
 
@@ -10,6 +12,7 @@ import com.library.common.core.domain.entity.SysUser;
  * 
  * @author ruoyi
  */
+@Mapper
 public interface SysUserMapper
 {
     /**
