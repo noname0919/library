@@ -104,13 +104,20 @@
             @click="handleView(scope.row)"
           >详情</el-button>
           <el-button
-            v-if="scope.row.availableQuantity > 0"
+            v-if="scope.row.availableQuantity > 0 && !scope.row.isBorrowedByCurrentUser"
             size="mini"
             type="text"
             icon="el-icon-reading"
             @click="handleBorrow(scope.row)"
             v-hasPermi="['library:book:borrow']"
           >借阅</el-button>
+          <el-button
+            v-if="scope.row.isBorrowedByCurrentUser"
+            size="mini"
+            type="text"
+            icon="el-icon-check"
+            disabled
+          >已借阅</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -152,12 +159,17 @@
             {{ form.availableQuantity }}
           </el-tag>
         </el-form-item>
+        <el-form-item label="借阅状态" v-if="form.isBorrowedByCurrentUser !== undefined">
+          <el-tag :type="form.isBorrowedByCurrentUser ? 'info' : 'success'">
+            {{ form.isBorrowedByCurrentUser ? '已借阅' : '未借阅' }}
+          </el-tag>
+        </el-form-item>
         <el-form-item label="图书封面" v-if="form.image">
           <el-image :src="form.image" style="width: 200px; height: 280px;" fit="cover" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitBorrow" v-if="form.availableQuantity > 0" v-hasPermi="['library:book:borrow']">立即借阅</el-button>
+        <el-button type="primary" @click="submitBorrow" v-if="form.availableQuantity > 0 && !form.isBorrowedByCurrentUser" v-hasPermi="['library:book:borrow']">立即借阅</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
