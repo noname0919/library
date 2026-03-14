@@ -3,6 +3,7 @@ package com.library.service.impl;
 import com.library.mapper.BookMapper;
 import com.library.mapper.BorrowRecordMapper;
 import com.library.service.IDashboardService;
+import com.library.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class DashboardServiceImpl implements IDashboardService {
 
     private final BookMapper bookMapper;
     private final BorrowRecordMapper borrowRecordMapper;
+    private final SysUserMapper sysUserMapper;
 
     @Override
     public Map<String, Object> getStatistics() {
@@ -37,8 +39,8 @@ public class DashboardServiceImpl implements IDashboardService {
         Long totalBooks = bookMapper.selectTotalCount();
         statistics.put("totalBooks", totalBooks);
 
-        // 用户总数（从借阅记录中统计不同的用户ID）
-        Long totalUsers = borrowRecordMapper.countDistinctUsers();
+        // 用户总数（从sys_user表中统计所有用户）
+        Long totalUsers = sysUserMapper.countTotalUsers();
         statistics.put("totalUsers", totalUsers != null ? totalUsers : 0);
 
         // 今日借阅
