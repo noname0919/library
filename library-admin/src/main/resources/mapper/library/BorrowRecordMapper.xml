@@ -211,15 +211,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by date
     </select>
 
-    <select id="selectCategoryBorrowStats" parameterType="java.lang.Integer" resultType="java.util.Map">
+    <select id="selectCategoryBorrowStats" resultType="java.util.Map">
         select
             dd.dict_label as categoryName,
             count(br.id) as borrowCount
         from borrow_record br
         left join book b on br.book_id = b.id
         left join sys_dict_data dd on b.category_id = dd.dict_value and dd.dict_type = 'book_category'
-        <if test="days > 0">
-            where br.borrow_time >= date_sub(now(), interval #{days} day)
+        where 1=1
+        <if test="days != null and days > 0">
+            and br.borrow_time >= date_sub(now(), interval #{days} day)
         </if>
         group by dd.dict_value, dd.dict_label
         order by borrowCount desc
@@ -231,8 +232,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             count(br.id) as borrowCount
         from borrow_record br
         left join book b on br.book_id = b.id
-        <if test="days > 0">
-            where br.borrow_time >= date_sub(now(), interval #{days} day)
+        where 1=1
+        <if test="days != null and days > 0">
+            and br.borrow_time >= date_sub(now(), interval #{days} day)
         </if>
         group by b.id, b.book_name
         order by borrowCount desc
@@ -245,8 +247,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             count(br.id) as borrowCount
         from borrow_record br
         left join sys_user u on br.user_id = u.user_id
-        <if test="days > 0">
-            where br.borrow_time >= date_sub(now(), interval #{days} day)
+        where 1=1
+        <if test="days != null and days > 0">
+            and br.borrow_time >= date_sub(now(), interval #{days} day)
         </if>
         group by br.user_id, u.nick_name, u.user_name
         order by borrowCount desc

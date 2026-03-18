@@ -64,19 +64,19 @@ public interface BookMapper
     int deleteBookByIds(Long[] ids);
 
     /**
-     * 判断新增后是否重复
+     * 判断新增后是否重复（ISBN）
      * @param isbn
      * @return
      */
-    boolean checkAddExist(String isbn);
+    boolean checkAddExistByIsbn(String isbn);
 
     /**
-     * 修改判断是否重复
+     * 修改判断是否重复（ISBN）
      * @param isbn
      * @param id
      * @return
      */
-    boolean checkUpdateExist(@Param("isbn") String isbn, @Param("id") Long id);
+    boolean checkUpdateExistByIsbn(@Param("isbn") String isbn, @Param("id") Long id);
 
     /**
      * 根据id批量查询图书记录

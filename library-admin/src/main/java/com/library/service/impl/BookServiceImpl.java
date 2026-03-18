@@ -102,10 +102,8 @@ public class BookServiceImpl implements IBookService {
     @Override
     public int insertBook(Book book) {
         book.setCreateTime(DateUtils.getNowDate());
-        //校验新增是否重复
-        boolean isExist = bookMapper.checkAddExist(book.getIsbn());
-        if (isExist) {
-            throw new LibraryException(LibraryExceptionEnum.BOOK_EXIST);
+        if (bookMapper.checkAddExistByIsbn(book.getIsbn())) {
+            throw new LibraryException(LibraryExceptionEnum.BOOK_ISBN_EXIST);
         }
         return bookMapper.insertBook(book);
     }
@@ -119,18 +117,14 @@ public class BookServiceImpl implements IBookService {
     @Override
     public int updateBook(Book book) {
         book.setUpdateTime(DateUtils.getNowDate());
-        //判断修改后是否重复
-        boolean isExist = bookMapper.checkUpdateExist(book.getIsbn(), book.getId());
-        //修改的可借数量不能超过馆藏数量
+        if (bookMapper.checkUpdateExistByIsbn(book.getIsbn(), book.getId())) {
+            throw new LibraryException(LibraryExceptionEnum.BOOK_ISBN_EXIST);
+        }
         if (book.getAvailableQuantity() > book.getTotalQuantity()) {
             throw new LibraryException(LibraryExceptionEnum.BOOK_QUANTITY_ERROR);
         }
-        //馆藏数量不能小于已借数量
         if (book.getTotalQuantity() < book.getBorrowedQuantity()) {
             throw new LibraryException(LibraryExceptionEnum.BOOK_QUANTITY_ERROR);
-        }
-        if (isExist) {
-            throw new LibraryException(LibraryExceptionEnum.BOOK_EXIST);
         }
         return bookMapper.updateBook(book);
     }
