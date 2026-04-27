@@ -1,7 +1,7 @@
 # 项目相关配置
 ruoyi:
   # 名称
-  name: RuoYi
+  name: xiangziyang
   # 版本
   version: 3.9.1
   # 版权年份
@@ -91,7 +91,7 @@ spring:
   mail:
     host: smtp.qq.com
     username: 877878529@qq.com
-    password: ydiivphhryvybchh
+    password:
     default-encoding: UTF-8
     protocol: smtp
     port: 587
@@ -151,6 +151,6 @@ xss:
 
 # AI配置
 ai:
-  apiKey: f7e11734b62e4aeab211aca50de5a2e5.gZxSz08hV8fkI64m  # 智谱AI的API Key
-  model: glm-4-flash         # 模型名称，默认使用免费的GLM-4-Flash
+  apiKey:
+  model: GLM-4-Flash-250414         # 模型名称，默认使用免费的GLM-4-Flash
   apiUrl: https://open.bigmodel.cn/api/paas/v4/chat/completions

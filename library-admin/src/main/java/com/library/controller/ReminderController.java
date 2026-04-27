@@ -4,8 +4,10 @@ import com.library.common.core.controller.BaseController;
 import com.library.common.core.domain.AjaxResult;
 import com.library.domain.BorrowRecord;
 import com.library.mapper.BorrowRecordMapper;
+import com.library.task.OverdueReminderTask;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +30,7 @@ import java.util.Map;
 public class ReminderController extends BaseController {
 
     private final BorrowRecordMapper borrowRecordMapper;
+    private final OverdueReminderTask overdueReminderTask;
 
     /**
      * 获取用户借阅提醒信息
@@ -52,5 +55,18 @@ public class ReminderController extends BaseController {
         result.put("hasReminder", !dueSoonList.isEmpty() || !overdueList.isEmpty());
         
         return AjaxResult.success(result);
+    }
+
+    /**
+     * 手动触发逾期提醒任务
+     */
+    @PostMapping("/trigger")
+    public AjaxResult triggerOverdueReminder() {
+        try {
+            overdueReminderTask.sendOverdueReminders();
+            return AjaxResult.success("逾期提醒任务执行完成，请查看日志");
+        } catch (Exception e) {
+            return AjaxResult.error("逾期提醒任务执行失败：" + e.getMessage());
+        }
     }
 }
